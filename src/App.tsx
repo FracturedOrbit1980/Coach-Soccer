@@ -14,8 +14,8 @@ function Title() {
   useEffect(() => {
     document.title =
       location.pathname === "/"
-        ? "Sportfika"
-        : `${session.title} · Sportfika`;
+        ? "Sportfica"
+        : `${session.title} · Sportfica`;
   }, [location.pathname, session.title]);
   return null;
 }

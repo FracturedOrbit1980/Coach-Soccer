@@ -1,10 +1,10 @@
-# Sportfika
+# Sportfica
 
 **Open the app:** [https://fracturedorbit1980.github.io/Coach-Soccer/](https://fracturedorbit1980.github.io/Coach-Soccer/)
 
 The link is case-sensitive. Open that address in a browser and the board runs. No install.
 
-Sportfika is a tactics board for coaches. Draw 5-a-side, 7-a-side, 9-a-side, and 11-a-side, from the first grassroots age group through to GDL and pro.
+Sportfica is a tactics board for coaches. Draw 5-a-side, 7-a-side, 9-a-side, and 11-a-side, from the first grassroots age group through to GDL and pro.
 
 ## What you can do
 

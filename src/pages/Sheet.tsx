@@ -22,7 +22,7 @@ export function SheetPage() {
         <header className="sheet-head">
           <Mark size={36} />
           <div>
-            <p>Sportfika · {session.tier}-a-side · {session.ageGroup}</p>
+            <p>Sportfica · {session.tier}-a-side · {session.ageGroup}</p>
             <h1>{session.title}</h1>
           </div>
           <div className="sheet-score">

@@ -29,7 +29,7 @@ export function ClientsPage() {
         <Link to="/" className="brand">
           <Mark />
           <span>
-            <strong>Sportfika</strong>
+            <strong>Sportfica</strong>
             <small>Coaching module</small>
           </span>
         </Link>

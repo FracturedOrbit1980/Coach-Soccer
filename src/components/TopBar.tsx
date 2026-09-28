@@ -46,7 +46,7 @@ export function TopBar() {
       <Link to="/" className="brand">
         <Mark size={26} />
         <span>
-          <strong>Sportfika</strong>
+          <strong>Sportfica</strong>
           <small>Tactics board</small>
         </span>
       </Link>

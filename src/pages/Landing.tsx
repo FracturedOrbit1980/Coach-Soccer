@@ -45,7 +45,7 @@ export function Landing() {
         <Link to="/" className="brand">
           <Mark />
           <span>
-            <strong>Sportfika</strong>
+            <strong>Sportfica</strong>
             <small>Tactics board</small>
           </span>
         </Link>
@@ -63,7 +63,7 @@ export function Landing() {
           <p className="eyebrow">Grassroots to GDL and pro</p>
           <h1>The session, drawn the way your team plays.</h1>
           <p className="lede">
-            Sportfika is a tactics board for 5-a-side, 7-a-side, 9-a-side, and 11-a-side. Place the mannequins, turn the mini goals, and keep the squad’s names from the first grassroots age through to GDL and pro.
+            Sportfica is a tactics board for 5-a-side, 7-a-side, 9-a-side, and 11-a-side. Place the mannequins, turn the mini goals, and keep the squad’s names from the first grassroots age through to GDL and pro.
           </p>
           <div className="hero-actions">
             <Link className="btn primary" to="/board">
@@ -169,7 +169,7 @@ export function Landing() {
 
       <footer className="site-footer">
         <p>
-          Sportfika keeps the squad, the pictures, and the session on this browser. From the first grassroots age group to GDL and pro.
+          Sportfica keeps the squad, the pictures, and the session on this browser. From the first grassroots age group to GDL and pro.
         </p>
         <Link to="/board">Start from the current board</Link>
       </footer>

@@ -45,7 +45,7 @@ export function ClientProfilePage() {
         <Link to="/" className="brand">
           <Mark />
           <span>
-            <strong>Sportfika</strong>
+            <strong>Sportfica</strong>
             <small>{roleLabel(editor.staffRole)}</small>
           </span>
         </Link>
