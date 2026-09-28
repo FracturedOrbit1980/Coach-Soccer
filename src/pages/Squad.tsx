@@ -23,7 +23,7 @@ export function SquadPage() {
         </Link>
         <nav>
           <Link to="/board" className="nav-keep">Board</Link>
-          <Link to="/clients" className="nav-keep">Clients</Link>
+          <Link to="/clients" className="nav-keep">Players</Link>
           <Link to="/squad" className="nav-keep">Squad</Link>
         </nav>
       </header>

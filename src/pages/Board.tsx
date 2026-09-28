@@ -186,13 +186,20 @@ export function BoardPage() {
       />
       <div className="stage">
         <div className="stage-bar">
-          <div className="views" role="group" aria-label="Pitch view">
-            {VIEWS.map((view) => (
-              <button key={view.id} type="button" aria-pressed={editor.pitchView === view.id} onClick={() => editor.setPitchView(view.id)}>
-                {view.label}
-              </button>
-            ))}
-          </div>
+          <label className="views-dropdown-label" aria-label="Pitch View">
+            <span>View:</span>
+            <select
+              className="view-select"
+              value={editor.pitchView}
+              onChange={(e) => editor.setPitchView(e.target.value as PitchView)}
+            >
+              {VIEWS.map((view) => (
+                <option key={view.id} value={view.id}>
+                  {view.label} pitch
+                </option>
+              ))}
+            </select>
+          </label>
           <div className="views">
             <button type="button" aria-pressed={editor.grid} onClick={editor.toggleGrid}>
               Grid

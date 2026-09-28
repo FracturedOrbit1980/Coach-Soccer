@@ -11,6 +11,19 @@ export const COACHING_AXES = [
   "Composure",
 ];
 
+export const BALL_MASTERY_AXES = [
+  "Dribble: Close Control",
+  "Dribble: Speed Burst",
+  "Turns: Cruyff & Cut",
+  "Turns: Drag-Back",
+  "Moves: Scissors & Feint",
+  "Moves: Stepover & Chop",
+  "Moves: 1v1 Elastico",
+  "Juggling: Foot-to-Foot",
+  "Juggling: Aerial Touch",
+  "Weak-Foot Mastery",
+];
+
 export const MATCH_AXES = [
   "SCA",
   "Dribbling",
@@ -29,5 +42,6 @@ export const MATCH_AXES = [
 
 export const TEMPLATES = [
   { id: "coaching", label: "Coaching competencies", axes: COACHING_AXES },
+  { id: "ball-mastery", label: "1-Person Ball Mastery & 1v1", axes: BALL_MASTERY_AXES },
   { id: "match", label: "Match-action chart", axes: MATCH_AXES },
 ] as const;

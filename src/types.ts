@@ -127,18 +127,40 @@ export interface Review {
   scores: Record<string, number>;
 }
 
-export interface Client {
+export interface BallMasteryAssessment {
+  dribbling: number; // 0-10
+  turning: number; // 0-10
+  movesToBeat: number; // 0-10
+  juggling: number; // 0-10
+  firstTouch: number; // 0-10
+  weakFoot: number; // 0-10
+}
+
+export interface IndividualDevelopment {
+  strengths: string;
+  growthAreas: string;
+  targetMilestone: string;
+  insights: string;
+  ballMastery: BallMasteryAssessment;
+  completedSkillIds?: string[];
+}
+
+export interface PlayerProfile {
   id: string;
   name: string;
   age: string;
   club: string;
   position: string;
+  dominantFoot?: "Right" | "Left" | "Both";
   notes: string;
+  individualDevelopment?: IndividualDevelopment;
   competencies: Competency[];
   reviews: Review[];
   createdAt: string;
   updatedAt: string;
 }
+
+export type Client = PlayerProfile;
 
 export interface Session {
   id: string;

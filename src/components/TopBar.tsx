@@ -82,13 +82,13 @@ export function TopBar() {
       </button>
       <select
         className="client-select"
-        aria-label="Save this session under"
+        aria-label="Save this session under player profile"
         value={editor.session.clientId ?? ""}
         onChange={(event) => editor.assignClient(event.target.value || null)}
       >
-        <option value="">No client</option>
+        <option value="">No player assigned</option>
         {editor.clients.map((client) => (
-          <option key={client.id} value={client.id}>{client.name}</option>
+          <option key={client.id} value={client.id}>Player: {client.name}</option>
         ))}
       </select>
       <div className="top-actions">
@@ -108,7 +108,7 @@ export function TopBar() {
           File
         </button>
         <Link to="/squad" className="labelled">Squad</Link>
-        <Link to="/clients" className="labelled">Clients</Link>
+        <Link to="/clients" className="labelled">Players</Link>
         <button type="button" aria-label="Library" onClick={() => setMenu(menu === "library" ? null : "library")}>
           <FolderOpen size={16} />
         </button>
@@ -170,7 +170,9 @@ export function TopBar() {
               <button type="button" onClick={() => { editor.loadLibrary(entry.id); setMenu(null); }}>
                 <b>{entry.name}</b>
                 <small>
-                  {editor.clients.find((client) => client.id === (entry.clientId ?? entry.session.clientId))?.name ?? "No client"} · {SCAFFOLDS[entry.tier].name} · {new Date(entry.updatedAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  {editor.clients.find((client) => client.id === (entry.clientId ?? entry.session.clientId))?.name
+                    ? `Player: ${editor.clients.find((client) => client.id === (entry.clientId ?? entry.session.clientId))?.name}`
+                    : "Team drill"} · {SCAFFOLDS[entry.tier].name} · {new Date(entry.updatedAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </small>
               </button>
               <button type="button" className="text-btn danger" onClick={() => editor.deleteLibrary(entry.id)}>

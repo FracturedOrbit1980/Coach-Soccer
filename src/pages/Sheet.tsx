@@ -6,9 +6,10 @@ import { validate } from "../lib/validate";
 import { useEditor } from "../store/editor";
 
 export function SheetPage() {
-  const { session } = useEditor();
+  const { session, clients } = useEditor();
   const report = validate(session);
   const moment = MOMENTS.find((item) => item.id === session.moment)?.label ?? session.moment;
+  const linkedPlayer = clients.find((c) => c.id === session.clientId);
 
   return (
     <div className="sheet-page">
@@ -22,8 +23,11 @@ export function SheetPage() {
         <header className="sheet-head">
           <Mark size={36} />
           <div>
-            <p>Sportfica · {session.tier}-a-side · {session.ageGroup}</p>
+            <p>Sportfica Coach Setup · {session.tier}-a-side · {session.ageGroup}</p>
             <h1>{session.title}</h1>
+            {linkedPlayer && (
+              <p className="hint">Linked Player Profile: <strong>{linkedPlayer.name}</strong> ({linkedPlayer.position})</p>
+            )}
           </div>
           <div className="sheet-score">
             Method {report.score}/{report.max}

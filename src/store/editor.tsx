@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { TEMPLATES } from "../data/competencies";
+import { drillToPhase, findDrillById } from "../data/drills";
 import { createSample } from "../data/samples";
 import { SCAFFOLDS } from "../data/scaffolding";
-import { axesToCompetencies, isClient, isStaffRole, makeClient, makeReview } from "../lib/clients";
+import { axesToCompetencies, defaultIndividualDevelopment, isClient, isStaffRole, makeClient, makeReview } from "../lib/clients";
 import { tokensForFormation } from "../lib/geometry";
 import { uid } from "../lib/id";
 import { suggestPress } from "../lib/press";
@@ -33,6 +34,7 @@ import {
 import type {
   Client,
   Frame,
+  IndividualDevelopment,
   InspectorTab,
   LibraryEntry,
   Opponent,
@@ -256,7 +258,13 @@ interface EditorApi extends EditorState {
   loadLibrary: (id: string) => void;
   deleteLibrary: (id: string) => void;
   setStaffRole: (role: StaffRole) => void;
-  createClient: (input: { name: string; age: string; club: string; position: string }) => string;
+  createClient: (input: {
+    name: string;
+    age: string;
+    club: string;
+    position: string;
+    dominantFoot?: "Right" | "Left" | "Both";
+  }) => string;
   updateClient: (id: string, partial: Partial<Client>) => void;
   deleteClient: (id: string) => void;
   addReview: (clientId: string) => void;
@@ -278,6 +286,13 @@ interface EditorApi extends EditorState {
   removeSquadPlayer: (seasonId: string, playerId: string) => void;
   loadSampleSquad: (seasonId: string) => void;
   applySquadToFrame: () => void;
+  loadDrillIntoPhase: (drillId: string, variantIndex?: number) => void;
+  addDrillAsPhase: (drillId: string, variantIndex?: number) => void;
+  updateIndividualDevelopment: (
+    playerId: string,
+    partial: Partial<IndividualDevelopment> | ((current: IndividualDevelopment) => IndividualDevelopment),
+  ) => void;
+  toggleSkillCompleted: (playerId: string, skillId: string) => void;
 }
 
 const EditorContext = createContext<EditorApi | null>(null);
@@ -737,7 +752,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         setState((current) => ({
           ...current,
           clients: [client, ...current.clients],
-          notice: `${client.name} is saved on this browser.`,
+          notice: `${client.name}’s player profile is saved on this browser.`,
         }));
         return client.id;
       },
@@ -753,7 +768,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
           ...current,
           clients: current.clients.filter((client) => client.id !== id),
           session: current.session.clientId === id ? { ...current.session, clientId: undefined } : current.session,
-          notice: "Client removed. Their saved sessions are still in the library.",
+          notice: "Player profile removed. Saved sessions are still in the library.",
         })),
       addReview: (clientId) =>
         setState((current) => ({
@@ -962,6 +977,65 @@ export function EditorProvider({ children }: { children: ReactNode }) {
             notice: `Home players now use ${season.name}, ${season.season}.`,
           });
         }),
+      loadDrillIntoPhase: (drillId: string, variantIndex = 0) =>
+        setState((current) => {
+          const drill = findDrillById(drillId);
+          if (!drill) return current;
+          const active = phaseOf(current);
+          const generated = drillToPhase(drill, variantIndex);
+          const updatedPhase: Phase = {
+            ...generated,
+            id: active.id,
+          };
+          const session = updatePhase(current.session, active.id, () => updatedPhase);
+          return withHistory(current, session, {
+            activeFrameId: updatedPhase.frames[0].id,
+            selectedId: null,
+            notice: `Loaded drill "${drill.title}". Press Space to animate.`,
+          });
+        }),
+      addDrillAsPhase: (drillId: string, variantIndex = 0) =>
+        setState((current) => {
+          const drill = findDrillById(drillId);
+          if (!drill) return current;
+          const generated = drillToPhase(drill, variantIndex);
+          const session = {
+            ...current.session,
+            phases: [...current.session.phases, generated],
+          };
+          return withHistory(current, session, {
+            activePhaseId: generated.id,
+            activeFrameId: generated.frames[0].id,
+            selectedId: null,
+            notice: `Added "${drill.title}" to session with animated keyframes.`,
+          });
+        }),
+      updateIndividualDevelopment: (playerId, partial) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((player) => {
+            if (player.id !== playerId) return player;
+            const currentIdp = player.individualDevelopment ?? defaultIndividualDevelopment();
+            const nextIdp = typeof partial === "function" ? partial(currentIdp) : { ...currentIdp, ...partial };
+            return { ...player, individualDevelopment: nextIdp, updatedAt: now() };
+          }),
+        })),
+      toggleSkillCompleted: (playerId, skillId) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((player) => {
+            if (player.id !== playerId) return player;
+            const currentIdp = player.individualDevelopment ?? defaultIndividualDevelopment();
+            const set = new Set(currentIdp.completedSkillIds ?? []);
+            if (set.has(skillId)) set.delete(skillId);
+            else set.add(skillId);
+            return {
+              ...player,
+              individualDevelopment: { ...currentIdp, completedSkillIds: Array.from(set) },
+              updatedAt: now(),
+            };
+          }),
+        })),
     };
   }, [state]);
 

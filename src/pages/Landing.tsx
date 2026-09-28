@@ -53,7 +53,7 @@ export function Landing() {
           <a href="#formats">Formats</a>
           <a href="#session">The session</a>
           <Link to="/squad" className="nav-keep">Squad</Link>
-          <Link to="/clients" className="nav-keep">Clients</Link>
+          <Link to="/clients" className="nav-keep">Player Profiles</Link>
           <Link to="/board" className="nav-keep">Open board</Link>
         </nav>
       </header>

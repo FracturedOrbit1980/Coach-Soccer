@@ -1,8 +1,10 @@
-import { ChevronDown, ChevronUp, Trash2, X } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronUp, Play, Sparkles, Trash2, X } from "lucide-react";
 import { BEHAVIOURS, FOCUS, INTERVENTION_STYLES, MOMENTS, PHASE_META, PILLARS, SCAFFOLDS, ZONES, AGE_GROUPS } from "../data/scaffolding";
+import { DRILL_LIBRARY, findDrillById, getDrillsForFormat } from "../data/drills";
 import { validate } from "../lib/validate";
 import { useEditor } from "../store/editor";
-import type { InspectorTab, PhaseType, PlayerFocus } from "../types";
+import type { Format, InspectorTab, PhaseType, PlayerFocus } from "../types";
 import { Field, StringList } from "./Field";
 
 const TABS: { id: InspectorTab; label: string }[] = [
@@ -20,6 +22,16 @@ export function Inspector() {
   const selected = frame.tokens.find((token) => token.id === editor.selectedId && editor.selectedKind === "token");
   const selectedStroke = frame.strokes.find((stroke) => stroke.id === editor.selectedId && editor.selectedKind === "stroke");
   const ages = AGE_GROUPS.includes(session.ageGroup) ? AGE_GROUPS : [session.ageGroup, ...AGE_GROUPS];
+
+  const [drillId, setDrillId] = useState<string>("");
+  const [variantIdx, setVariantIdx] = useState<number>(0);
+  const [drillFormatScope, setDrillFormatScope] = useState<"current" | "all">("current");
+
+  const availableDrills =
+    drillFormatScope === "current"
+      ? getDrillsForFormat(session.tier as Format)
+      : DRILL_LIBRARY;
+  const activeDrill = findDrillById(drillId);
 
   return (
     <aside className={`inspector ${editor.panelOpen ? "open" : ""}`}>
@@ -218,49 +230,159 @@ export function Inspector() {
 
         {editor.inspectorTab === "phase" && (
           <div className="stack">
-            <div className="phase-list">
-              {session.phases.map((item, index) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={item.id === phase.id ? "phase-chip on" : "phase-chip"}
-                  onClick={() => editor.setActivePhase(item.id)}
-                >
-                  <span>{index + 1}</span>
-                  <span>{item.title || PHASE_META[item.type].label}</span>
-                  <span>{item.minutes}′</span>
-                </button>
-              ))}
-            </div>
-            <div className="row-between">
+            {/* Phase Switcher Dropdown */}
+            <div className="phase-select-bar">
               <label className="field grow">
-                <span>Add phase</span>
+                <span>Phase ({session.phases.length})</span>
                 <select
-                  value=""
-                  onChange={(event) => {
-                    if (event.target.value) editor.addPhase(event.target.value as PhaseType);
-                  }}
+                  value={phase.id}
+                  aria-label="Select active phase"
+                  onChange={(event) => editor.setActivePhase(event.target.value)}
                 >
-                  <option value="">Choose</option>
-                  {scaffold.phaseTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {PHASE_META[type].label}
+                  {session.phases.map((item, index) => (
+                    <option key={item.id} value={item.id}>
+                      {index + 1}. {item.title || PHASE_META[item.type].label} ({item.minutes}′)
                     </option>
                   ))}
                 </select>
               </label>
               <div className="icon-pair">
-                <button type="button" aria-label="Move phase up" onClick={() => editor.movePhase(-1)}>
+                <button type="button" aria-label="Move phase up" title="Move phase up" onClick={() => editor.movePhase(-1)}>
                   <ChevronUp size={16} />
                 </button>
-                <button type="button" aria-label="Move phase down" onClick={() => editor.movePhase(1)}>
+                <button type="button" aria-label="Move phase down" title="Move phase down" onClick={() => editor.movePhase(1)}>
                   <ChevronDown size={16} />
                 </button>
-                <button type="button" aria-label="Delete phase" onClick={() => editor.removePhase(phase.id)}>
+                <button type="button" aria-label="Delete phase" title="Delete phase" onClick={() => editor.removePhase(phase.id)}>
                   <Trash2 size={15} />
                 </button>
               </div>
             </div>
+
+            {/* Drill Library Section with Dropdown Selection */}
+            <div className="drill-library-box">
+              <div className="row-between">
+                <span className="field-label">
+                  <Sparkles size={14} className="inline-icon" /> Drill Library
+                </span>
+                <div className="scope-toggle" role="group" aria-label="Drill format scope">
+                  <button
+                    type="button"
+                    className="scope-btn"
+                    aria-pressed={drillFormatScope === "current"}
+                    onClick={() => setDrillFormatScope("current")}
+                  >
+                    {session.tier}s
+                  </button>
+                  <button
+                    type="button"
+                    className="scope-btn"
+                    aria-pressed={drillFormatScope === "all"}
+                    onClick={() => setDrillFormatScope("all")}
+                  >
+                    All
+                  </button>
+                </div>
+              </div>
+
+              <label className="field">
+                <span>Select pre-populated drill</span>
+                <select
+                  value={drillId}
+                  aria-label="Drill library dropdown"
+                  onChange={(event) => {
+                    setDrillId(event.target.value);
+                    setVariantIdx(0);
+                  }}
+                >
+                  <option value="">Choose a drill from library...</option>
+                  {(["Warm-up & Ball Mastery", "Rondo & Possession", "Functional & Positional", "Game & Transition"] as const).map(
+                    (cat) => {
+                      const drillsInCat = availableDrills.filter((d) => d.category === cat);
+                      if (drillsInCat.length === 0) return null;
+                      return (
+                        <optgroup key={cat} label={cat}>
+                          {drillsInCat.map((d) => (
+                            <option key={d.id} value={d.id}>
+                              [{d.format}s] {d.title} ({d.durationMinutes}′)
+                            </option>
+                          ))}
+                        </optgroup>
+                      );
+                    },
+                  )}
+                </select>
+              </label>
+
+              {activeDrill && (
+                <div className="drill-detail-card">
+                  <div className="drill-meta-line">
+                    <span className="pill-badge">{activeDrill.category}</span>
+                    <span>
+                      {activeDrill.pitchDimensions.lengthM}×{activeDrill.pitchDimensions.widthM}m · {activeDrill.durationMinutes}′
+                    </span>
+                  </div>
+                  <p className="drill-desc">{activeDrill.organisation}</p>
+
+                  <label className="field">
+                    <span>Drill variant / progression</span>
+                    <select
+                      value={variantIdx}
+                      aria-label="Select drill variant"
+                      onChange={(event) => setVariantIdx(Number(event.target.value) || 0)}
+                    >
+                      {activeDrill.variants.map((v, i) => (
+                        <option key={v.id} value={i}>
+                          Variant {i + 1}: {v.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {activeDrill.variants[variantIdx] && (
+                    <p className="variant-note">
+                      <strong>Focus:</strong> {activeDrill.variants[variantIdx].description}
+                    </p>
+                  )}
+
+                  <div className="drill-actions">
+                    <button
+                      type="button"
+                      className="btn primary"
+                      onClick={() => editor.loadDrillIntoPhase(activeDrill.id, variantIdx)}
+                    >
+                      <Play size={13} /> Load into Current Phase
+                    </button>
+                    <button
+                      type="button"
+                      className="btn ghost"
+                      onClick={() => editor.addDrillAsPhase(activeDrill.id, variantIdx)}
+                    >
+                      + Add as New Phase
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Add Blank Phase Dropdown */}
+            <label className="field">
+              <span>+ Add blank phase</span>
+              <select
+                value=""
+                onChange={(event) => {
+                  if (event.target.value) editor.addPhase(event.target.value as PhaseType);
+                }}
+              >
+                <option value="">Choose phase type...</option>
+                {scaffold.phaseTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {PHASE_META[type].label} ({PHASE_META[type].hint})
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <Field label="Phase title" value={phase.title} onChange={(value, history) => editor.patchPhase({ title: value }, history)} />
             <div className="split">
               <Field label="Minutes" type="number" value={String(phase.minutes)} onChange={(value, history) => editor.patchPhase({ minutes: Number(value) || 0 }, history)} />
@@ -296,24 +418,27 @@ export function Inspector() {
               placeholder="Ask, then wait"
               onChange={(items, history) => editor.patchPhase({ questions: items }, history)}
             />
-            <div>
-              <p className="field-label">Prompts for {scaffold.name}</p>
-              <div className="chips">
+
+            {/* Prompts Dropdown instead of listed chips */}
+            <label className="field">
+              <span>Prompts for {scaffold.name}</span>
+              <select
+                value=""
+                onChange={(event) => {
+                  if (event.target.value && !phase.questions.includes(event.target.value)) {
+                    editor.patchPhase({ questions: [...phase.questions, event.target.value] });
+                  }
+                }}
+              >
+                <option value="">Select prompt to add to questions...</option>
                 {scaffold.questions.map((question) => (
-                  <button
-                    key={question}
-                    type="button"
-                    onClick={() => {
-                      if (!phase.questions.includes(question)) {
-                        editor.patchPhase({ questions: [...phase.questions, question] });
-                      }
-                    }}
-                  >
+                  <option key={question} value={question}>
                     {question}
-                  </button>
+                  </option>
                 ))}
-              </div>
-            </div>
+              </select>
+            </label>
+
             <ul className="watchouts">
               {scaffold.watchouts.map((item) => (
                 <li key={item}>{item}</li>

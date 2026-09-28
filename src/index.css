@@ -543,6 +543,152 @@ a { color: inherit; }
 .season-card[aria-pressed="true"] { border-color: rgba(60, 125, 255, 0.7); background: #1c334d; }
 .season-card span { color: var(--muted); font-size: 0.82rem; }
 
+/* Drill Library & Phase Dropdowns */
+.phase-select-bar { display: flex; gap: 8px; align-items: flex-end; }
+.drill-library-box {
+  background: rgba(12, 22, 33, 0.7);
+  border: 1px solid rgba(60, 125, 255, 0.35);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.inline-icon { display: inline-block; vertical-align: -2px; color: var(--gold); }
+.scope-toggle { display: inline-flex; gap: 2px; background: rgba(0,0,0,0.4); padding: 2px; border-radius: 6px; }
+.scope-btn {
+  background: transparent;
+  border: 0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.scope-btn[aria-pressed="true"] { background: var(--saltire); color: #fff; font-weight: 600; }
+.drill-detail-card {
+  background: rgba(16, 28, 42, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.drill-meta-line { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--muted); }
+.pill-badge {
+  background: rgba(60, 125, 255, 0.2);
+  color: #a8ccff;
+  border: 1px solid rgba(60, 125, 255, 0.4);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.drill-desc { font-size: 0.82rem; line-height: 1.4; color: var(--mist); margin: 0; }
+.variant-note { font-size: 0.78rem; color: var(--muted); margin: 0; }
+.drill-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.drill-actions .btn { font-size: 0.78rem; padding: 6px 10px; min-height: 30px; }
+
+/* Views dropdown on stage-bar */
+.views-dropdown-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.view-select {
+  background: #0c141d;
+  border: 1px solid var(--line);
+  color: var(--mist);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  min-height: 32px;
+}
+
+/* Player Profile & Ball Mastery Styles */
+.profile-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.profile-subtitle { color: var(--muted); font-size: 0.88rem; }
+.profile-badge {
+  background: rgba(61, 206, 151, 0.15);
+  color: var(--mint);
+  border: 1px solid rgba(61, 206, 151, 0.4);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.role-callout {
+  background: rgba(14, 25, 38, 0.9);
+  border-left: 3px solid var(--saltire);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.role-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--saltire);
+  display: block;
+  margin-bottom: 2px;
+}
+.role-callout p { margin: 0; font-size: 0.82rem; line-height: 1.4; color: var(--mist); }
+
+.ball-mastery-section {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ball-mastery-section h3 { margin: 0 0 4px; font-size: 1.15rem; font-family: "Barlow Condensed", sans-serif; letter-spacing: 0.02em; }
+.mastery-ratings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: rgba(10, 16, 24, 0.7);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.score-row.compact { font-size: 0.78rem; gap: 6px; }
+.mastery-cat-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); padding-bottom: 6px; overflow-x: auto; }
+.tab-btn {
+  background: transparent;
+  border: 0;
+  padding: 6px 12px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  border-radius: 8px;
+}
+.tab-btn.active {
+  background: #1c334d;
+  color: var(--mist);
+  font-weight: 600;
+}
+.skills-grid { display: flex; flex-direction: column; gap: 10px; }
+.skill-card {
+  background: rgba(16, 26, 38, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s ease;
+}
+.skill-card.mastered {
+  border-color: rgba(61, 206, 151, 0.5);
+  background: rgba(14, 34, 30, 0.85);
+}
+.skill-level { font-size: 0.72rem; color: var(--gold); border: 1px solid rgba(228, 182, 90, 0.4); padding: 1px 6px; border-radius: 999px; }
+.skill-desc { font-size: 0.84rem; line-height: 1.4; color: var(--mist); margin: 0; }
+.skill-benchmark { font-size: 0.78rem; color: #b6cde8; margin: 0; }
+.skill-cues { margin: 2px 0 6px; padding-left: 18px; font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
+.text-btn.success { color: var(--mint); }
+
 @media (max-width: 720px) {
   .nav nav a:not(.nav-keep) { display: none; }
   .hero { padding-top: 8px; }
