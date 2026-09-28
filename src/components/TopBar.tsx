@@ -107,6 +107,7 @@ export function TopBar() {
         <button type="button" className="labelled" onClick={() => setMenu(menu === "file" ? null : "file")}>
           File
         </button>
+        <Link to="/squad" className="labelled">Squad</Link>
         <Link to="/clients" className="labelled">Clients</Link>
         <button type="button" aria-label="Library" onClick={() => setMenu(menu === "library" ? null : "library")}>
           <FolderOpen size={16} />
@@ -126,6 +127,9 @@ export function TopBar() {
           </button>
           <Link to="/sheet" onClick={() => setMenu(null)}>
             Session sheet
+          </Link>
+          <Link to="/squad" onClick={() => setMenu(null)}>
+            Season team sheet
           </Link>
           <button type="button" onClick={() => { editor.newSession(); setMenu(null); }}>
             New blank session

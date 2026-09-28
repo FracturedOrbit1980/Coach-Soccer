@@ -5,6 +5,7 @@ import { ClientProfilePage } from "./pages/ClientProfile";
 import { ClientsPage } from "./pages/Clients";
 import { Landing } from "./pages/Landing";
 import { SheetPage } from "./pages/Sheet";
+import { SquadPage } from "./pages/Squad";
 import { EditorProvider, useEditor } from "./store/editor";
 
 function Title() {
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/board" element={<BoardPage />} />
           <Route path="/sheet" element={<SheetPage />} />
           <Route path="/clients" element={<ClientsPage />} />
+          <Route path="/squad" element={<SquadPage />} />
           <Route path="/clients/:clientId" element={<ClientProfilePage />} />
         </Routes>
       </EditorProvider>

@@ -34,7 +34,7 @@ const GROUPS: { label: string; tools: { id: Tool; label: string; icon: Component
     label: "Kit",
     tools: [
       { id: "cone", label: "Cone", icon: Cone },
-      { id: "mannequin", label: "Dummy", icon: PersonStanding },
+      { id: "mannequin", label: "Mannequin", icon: PersonStanding },
       { id: "goal", label: "Goal", icon: Goal },
       { id: "pole", label: "Pole", icon: Triangle },
     ],

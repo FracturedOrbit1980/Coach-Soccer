@@ -189,7 +189,7 @@ a { color: inherit; }
 .section-head h2 { font-size: clamp(2rem, 4vw, 3.4rem); line-height: 0.95; margin: 0; }
 .tier-grid, .split-feature { display: grid; gap: 14px; }
 .tier-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.split-feature { grid-template-columns: repeat(3, minmax(0, 1fr)); padding-bottom: 40px; }
+.split-feature { grid-template-columns: repeat(4, minmax(0, 1fr)); padding-bottom: 40px; }
 .tier-card ul { margin: 0 0 16px; padding-left: 18px; color: var(--muted); }
 .tier-card a { color: var(--gold); }
 .tier-c { box-shadow: inset 3px 0 var(--mint); }
@@ -304,7 +304,7 @@ a { color: inherit; }
 
 .stage { grid-area: stage; min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; position: relative; background: radial-gradient(ellipse at center, #16324a 0%, #0a1522 72%); }
 .stage-bar, .pitch-caption { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 8px 10px; }
-.pitch-caption { color: var(--muted); font-size: 0.8rem; }
+.pitch-caption { color: var(--muted); font-size: 0.8rem; flex-wrap: wrap; }
 .legend { display: inline-flex; align-items: center; gap: 8px; }
 .legend i, .thumb i {
   width: 8px; height: 8px; border-radius: 99px; display: inline-block;
@@ -374,7 +374,8 @@ a { color: inherit; }
 .tabs button { flex: 1; border: 0; background: transparent; color: var(--muted); border-bottom: 2px solid transparent; border-radius: 0; padding: 8px 4px; }
 .tabs button[aria-selected="true"] { color: var(--mist); border-color: var(--gold); }
 .inspector-body { overflow: auto; padding: 4px 12px 20px; }
-.selection { display: flex; gap: 8px; align-items: end; padding: 0 12px 10px; border-bottom: 1px solid var(--line); }
+.selection { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; padding: 0 12px 10px; border-bottom: 1px solid var(--line); }
+.selection .field { min-width: 108px; }
 .selection .field { flex: 1; }
 .phase-list { display: flex; flex-direction: column; gap: 6px; }
 .phase-chip { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; width: 100%; border-radius: 10px; }
@@ -476,7 +477,7 @@ a { color: inherit; }
   .inspector-back { display: block; position: fixed; inset: 0; border: 0; background: rgba(0, 0, 0, 0.45); z-index: 24; }
   .labelled span, .top-actions .labelled { padding-inline: 8px; }
   .sheet-grid, .sheet-meta { grid-template-columns: 1fr 1fr; }
-  .profile-layout { grid-template-columns: 1fr; }
+  .profile-layout, .squad-layout { grid-template-columns: 1fr; }
 }
 
 .clients-page { min-height: 100dvh; }
@@ -512,6 +513,32 @@ a { color: inherit; }
 .score-row { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(80px, 1.4fr) 36px; gap: 8px; align-items: center; color: var(--muted); font-size: 0.86rem; }
 .score-row b { color: var(--mist); font-weight: 600; }
 .client-select { max-width: 160px; border: 1px solid var(--line); background: #0c141d; border-radius: 999px; min-height: 34px; padding: 0 10px; }
+.squad-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.7fr); gap: 18px; align-items: start; margin-top: 8px; }
+.squad-editor { max-width: none; }
+.squad-list { display: flex; flex-direction: column; gap: 8px; }
+.squad-row { display: grid; grid-template-columns: 4.4rem minmax(0, 1fr) 6.4rem 36px; gap: 8px; align-items: center; }
+.squad-row input {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  background: #0c141d;
+  border-radius: 10px;
+  padding: 0 10px;
+}
+.squad-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.season-switch { max-width: none; }
+.season-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #0c141d;
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: inherit;
+}
+.season-card[aria-pressed="true"] { border-color: rgba(60, 125, 255, 0.7); background: #1c334d; }
+.season-card span { color: var(--muted); font-size: 0.82rem; }
 
 @media (max-width: 720px) {
   .nav nav a:not(.nav-keep) { display: none; }
@@ -523,6 +550,8 @@ a { color: inherit; }
   .sheet-grid, .sheet-meta { grid-template-columns: 1fr; }
   .profile-layout { grid-template-columns: 1fr; }
   .client-select { display: none; }
+  .squad-row { grid-template-columns: 4rem minmax(0, 1fr) 36px; }
+  .squad-row .pos { grid-column: 1 / -2; }
 }
 
 @media print {

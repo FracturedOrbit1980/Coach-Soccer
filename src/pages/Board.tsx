@@ -232,10 +232,13 @@ export function BoardPage() {
             <i className="away" /> Opp
             <i className="ball" /> Ball
           </span>
+          <button type="button" className="text-btn" onClick={editor.applySquadToFrame} disabled={playing}>
+            Use {editor.activeSeason.season || "squad"} names
+          </button>
           <span>Home attacks →</span>
         </div>
         {pictured.tokens.length === 0 && !playing && (
-          <p className="pitch-hint">Pick a shape in the rail, or choose Home and click the pitch.</p>
+          <p className="pitch-hint">Pick a shape in the rail, or choose Home and click the pitch. Players wear the season squad.</p>
         )}
       </div>
       <Timeline

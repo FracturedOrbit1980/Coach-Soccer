@@ -38,11 +38,52 @@ export function Inspector() {
         <div className="selection">
           {selected && (selected.kind === "player" || selected.kind === "gk") && (
             <>
+              <label className="field">
+                <span>Team sheet</span>
+                <select
+                  aria-label="Player from the season sheet"
+                  value={selected.squadPlayerId ?? ""}
+                  onChange={(event) => {
+                    const id = event.target.value;
+                    if (!id) {
+                      editor.patchToken(selected.id, { squadPlayerId: undefined }, true);
+                      return;
+                    }
+                    const player = editor.activeSeason.players.find((item) => item.id === id);
+                    if (!player) return;
+                    editor.patchToken(
+                      selected.id,
+                      {
+                        squadPlayerId: player.id,
+                        number: player.number,
+                        name: player.name,
+                        role: selected.role || player.position,
+                      },
+                      true,
+                    );
+                  }}
+                >
+                  <option value="">Custom</option>
+                  {editor.activeSeason.players.map((player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.number} · {player.name || "Unnamed"}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <Field
                 label="Number"
                 type="number"
                 value={String(selected.number ?? "")}
-                onChange={(value, history) => editor.patchToken(selected.id, { number: Number(value) || 0 }, history)}
+                onChange={(value, history) =>
+                  editor.patchToken(selected.id, { number: Number(value) || 0, squadPlayerId: undefined }, history)
+                }
+              />
+              <Field
+                label="Name"
+                value={selected.name ?? ""}
+                placeholder="From the squad"
+                onChange={(value, history) => editor.patchToken(selected.id, { name: value, squadPlayerId: undefined }, history)}
               />
               <Field
                 label="Role"

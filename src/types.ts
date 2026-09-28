@@ -66,6 +66,8 @@ export interface Token {
   kind: TokenKind;
   team?: Team;
   number?: number;
+  name?: string;
+  squadPlayerId?: string;
   role?: string;
   label?: string;
   x: number;
@@ -167,4 +169,19 @@ export interface LibraryEntry {
   session: Session;
   clientId?: string;
   savedBy?: StaffRole;
+}
+
+export interface SquadPlayer {
+  id: string;
+  number: number;
+  name: string;
+  position: string;
+}
+
+export interface SeasonSheet {
+  id: string;
+  name: string;
+  season: string;
+  club: string;
+  players: SquadPlayer[];
 }

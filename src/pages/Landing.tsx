@@ -53,6 +53,7 @@ export function Landing() {
         <nav>
           <a href="#tiers">Licences</a>
           <a href="#pillars">Four pillars</a>
+          <Link to="/squad" className="nav-keep">Squad</Link>
           <Link to="/clients" className="nav-keep">Clients</Link>
           <Link to="/board" className="nav-keep">Open board</Link>
         </nav>
@@ -142,6 +143,13 @@ export function Landing() {
           <h2>Keyframes, not a video editor.</h2>
           <p>
             Record the start picture, the trigger, and the outcome. Scrub the timeline, change the speed, and keep an onion-skin of the previous frame so the run is honest.
+          </p>
+        </article>
+        <article>
+          <p className="eyebrow">Season squad</p>
+          <h2>Names that survive the next drill.</h2>
+          <p>
+            Keep a team sheet for the season. Drop a shape or place a home mannequin and the shirt number and surname come with it. Change the sheet once and the open picture follows.
           </p>
         </article>
         <article>

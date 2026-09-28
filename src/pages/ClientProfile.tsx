@@ -51,6 +51,7 @@ export function ClientProfilePage() {
         </Link>
         <nav>
           <Link to="/clients" className="nav-keep">Clients</Link>
+          <Link to="/squad" className="nav-keep">Squad</Link>
           <Link to="/board" className="nav-keep">Board</Link>
         </nav>
       </header>

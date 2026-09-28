@@ -35,6 +35,7 @@ export function ClientsPage() {
         </Link>
         <nav>
           <Link to="/board" className="nav-keep">Board</Link>
+          <Link to="/squad" className="nav-keep">Squad</Link>
           <Link to="/clients" className="nav-keep">Clients</Link>
         </nav>
       </header>

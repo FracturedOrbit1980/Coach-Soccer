@@ -7,6 +7,17 @@ import { tokensForFormation } from "../lib/geometry";
 import { uid } from "../lib/id";
 import { suggestPress } from "../lib/press";
 import {
+  blankSeason,
+  detachSquadPlayer,
+  isSeason,
+  nextShirt,
+  nextSquadPick,
+  samplePlayers,
+  stampFromSquad,
+  starterSeason,
+  syncSquadPlayer,
+} from "../lib/squad";
+import {
   blankPhase,
   blankSession,
   cloneFrame,
@@ -30,7 +41,9 @@ import type {
   PitchView,
   Point,
   Review,
+  SeasonSheet,
   Session,
+  SquadPlayer,
   StaffRole,
   StrokeKind,
   Team,
@@ -48,6 +61,8 @@ interface PersistShape {
   activeFrameId: string;
   clients: Client[];
   staffRole: StaffRole;
+  seasons: SeasonSheet[];
+  activeSeasonId: string;
 }
 
 interface EditorState {
@@ -55,6 +70,8 @@ interface EditorState {
   library: LibraryEntry[];
   clients: Client[];
   staffRole: StaffRole;
+  seasons: SeasonSheet[];
+  activeSeasonId: string;
   activePhaseId: string;
   activeFrameId: string;
   tool: Tool;
@@ -72,6 +89,22 @@ interface EditorState {
   panelOpen: boolean;
 }
 
+function readSeasons(data: Partial<PersistShape>): { seasons: SeasonSheet[]; activeSeasonId: string } {
+  const seasons = Array.isArray(data.seasons) ? data.seasons.filter((entry) => isSeason(entry)) : [];
+  if (seasons.length === 0) {
+    const seeded = starterSeason();
+    return { seasons: [seeded], activeSeasonId: seeded.id };
+  }
+  const activeSeasonId = seasons.some((season) => season.id === data.activeSeasonId)
+    ? (data.activeSeasonId as string)
+    : seasons[0].id;
+  return { seasons, activeSeasonId };
+}
+
+function activeOf(state: EditorState): SeasonSheet {
+  return state.seasons.find((season) => season.id === state.activeSeasonId) ?? state.seasons[0];
+}
+
 function loadPersisted(): PersistShape | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -82,6 +115,7 @@ function loadPersisted(): PersistShape | null {
       ? data.library.filter((entry) => entry && isSession(entry.session))
       : [];
     const clients = Array.isArray(data.clients) ? data.clients.filter((entry) => isClient(entry)) : [];
+    const roster = readSeasons(data);
     return {
       session: data.session,
       library,
@@ -89,6 +123,8 @@ function loadPersisted(): PersistShape | null {
       staffRole: isStaffRole(data.staffRole) ? data.staffRole : "coach",
       activePhaseId: data.activePhaseId ?? data.session.phases[0].id,
       activeFrameId: data.activeFrameId ?? data.session.phases[0].frames[0].id,
+      seasons: roster.seasons,
+      activeSeasonId: roster.activeSeasonId,
     };
   } catch {
     return null;
@@ -119,11 +155,14 @@ function initialState(): EditorState {
   }
   const session = createSample("B");
   const lead = leadPhase(session);
+  const seeded = starterSeason();
   return {
     session,
     library: [],
     clients: [],
     staffRole: "coach",
+    seasons: [seeded],
+    activeSeasonId: seeded.id,
     activePhaseId: lead.phaseId,
     activeFrameId: lead.frameId,
     tool: "select",
@@ -224,6 +263,16 @@ interface EditorApi extends EditorState {
   applyTemplate: (clientId: string, templateId: string) => void;
   assignClient: (clientId: string | null) => void;
   newSessionForClient: (clientId: string) => void;
+  activeSeason: SeasonSheet;
+  setActiveSeason: (id: string) => void;
+  createSeason: () => void;
+  updateSeason: (id: string, partial: Partial<Pick<SeasonSheet, "name" | "season" | "club">>) => void;
+  deleteSeason: (id: string) => void;
+  addSquadPlayer: (seasonId: string) => void;
+  updateSquadPlayer: (seasonId: string, playerId: string, partial: Partial<Pick<SquadPlayer, "number" | "name" | "position">>) => void;
+  removeSquadPlayer: (seasonId: string, playerId: string) => void;
+  loadSampleSquad: (seasonId: string) => void;
+  applySquadToFrame: () => void;
 }
 
 const EditorContext = createContext<EditorApi | null>(null);
@@ -239,6 +288,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       library: state.library,
       clients: state.clients,
       staffRole: state.staffRole,
+      seasons: state.seasons,
+      activeSeasonId: state.activeSeasonId,
       activePhaseId: phase.id,
       activeFrameId: frame.id,
     };
@@ -426,9 +477,20 @@ export function EditorProvider({ children }: { children: ReactNode }) {
             );
           } else if (tool === "gk-home" || tool === "gk-away") {
             const team: Team = tool === "gk-home" ? "home" : "away";
+            const pick = team === "home" ? nextSquadPick(activeOf(current).players, tokens, team, true) : undefined;
             moveOrAdd(
               (token) => token.kind === "gk" && token.team === team,
-              () => ({ id: uid(), kind: "gk", team, number: 1, role: "GK", x, y }),
+              () => ({
+                id: uid(),
+                kind: "gk",
+                team,
+                number: pick?.number ?? 1,
+                name: pick?.name,
+                squadPlayerId: pick?.id,
+                role: "GK",
+                x,
+                y,
+              }),
             );
           } else if (tool === "home" || tool === "away") {
             const team: Team = tool === "home" ? "home" : "away";
@@ -437,12 +499,15 @@ export function EditorProvider({ children }: { children: ReactNode }) {
             if (count >= max) {
               notice = `${SCAFFOLDS[current.session.tier].name} usually stays at ${max} a side. The player was still added.`;
             }
+            const pick = team === "home" ? nextSquadPick(activeOf(current).players, tokens, team, false) : undefined;
             const created: Token = {
               id: uid(),
               kind: "player",
               team,
-              number: nextNumber(tokens, team),
-              role: "",
+              number: pick?.number ?? nextNumber(tokens, team),
+              name: pick?.name,
+              squadPlayerId: pick?.id,
+              role: pick?.position ?? "",
               x,
               y,
             };
@@ -507,13 +572,26 @@ export function EditorProvider({ children }: { children: ReactNode }) {
           return { ...current, session: { ...session, updatedAt: now() } };
         }),
       applyFormation: (team, name) =>
-        editFrame((item) => ({
-          ...item,
-          tokens: [
-            ...item.tokens.filter((token) => !(token.team === team && (token.kind === "player" || token.kind === "gk"))),
-            ...tokensForFormation(team, name),
-          ],
-        })),
+        setState((current) => {
+          const active = phaseOf(current);
+          const activeFrame = frameOf(current, active);
+          const season = team === "home" ? activeOf(current) : null;
+          const placed = season ? stampFromSquad(tokensForFormation(team, name), season.players, team) : tokensForFormation(team, name);
+          const session = updateFrame(current.session, active.id, activeFrame.id, (item) => ({
+            ...item,
+            tokens: [
+              ...item.tokens.filter((token) => !(token.team === team && (token.kind === "player" || token.kind === "gk"))),
+              ...placed,
+            ],
+          }));
+          return withHistory(current, session, {
+            selectedId: null,
+            selectedKind: null,
+            ...(season && season.players.length > 0
+              ? { notice: `${name} is wearing the ${season.season} squad.` }
+              : {}),
+          });
+        }),
       suggest: () =>
         setState((current) => {
           const active = phaseOf(current);
@@ -785,6 +863,99 @@ export function EditorProvider({ children }: { children: ReactNode }) {
             inspectorTab: "session",
             notice: client ? `New session for ${client.name}. Save it when the picture is ready.` : "New session.",
           };
+        }),
+      activeSeason: activeOf(state),
+      setActiveSeason: (id) =>
+        setState((current) => (current.seasons.some((season) => season.id === id) ? { ...current, activeSeasonId: id } : current)),
+      createSeason: () =>
+        setState((current) => {
+          const season = blankSeason();
+          return {
+            ...current,
+            seasons: [...current.seasons, season],
+            activeSeasonId: season.id,
+            notice: "New season sheet. Add the squad, then use it on the board.",
+          };
+        }),
+      updateSeason: (id, partial) =>
+        setState((current) => ({
+          ...current,
+          seasons: current.seasons.map((season) => (season.id === id ? { ...season, ...partial } : season)),
+        })),
+      deleteSeason: (id) =>
+        setState((current) => {
+          if (current.seasons.length < 2) return { ...current, notice: "Keep at least one season sheet." };
+          const seasons = current.seasons.filter((season) => season.id !== id);
+          return {
+            ...current,
+            seasons,
+            activeSeasonId: current.activeSeasonId === id ? seasons[0].id : current.activeSeasonId,
+            notice: "Season sheet removed.",
+          };
+        }),
+      addSquadPlayer: (seasonId) =>
+        setState((current) => ({
+          ...current,
+          seasons: current.seasons.map((season) => {
+            if (season.id !== seasonId) return season;
+            const player: SquadPlayer = { id: uid(), number: nextShirt(season.players), name: "", position: "" };
+            return { ...season, players: [...season.players, player] };
+          }),
+        })),
+      updateSquadPlayer: (seasonId, playerId, partial) =>
+        setState((current) => {
+          let previous: SquadPlayer | null = null;
+          let nextPlayer: SquadPlayer | null = null;
+          const seasons = current.seasons.map((season) => {
+            if (season.id !== seasonId) return season;
+            return {
+              ...season,
+              players: season.players.map((player) => {
+                if (player.id !== playerId) return player;
+                previous = player;
+                nextPlayer = {
+                  ...player,
+                  ...partial,
+                  number: partial.number !== undefined && Number.isFinite(partial.number) ? partial.number : player.number,
+                };
+                return nextPlayer;
+              }),
+            };
+          });
+          const session = previous && nextPlayer ? syncSquadPlayer(current.session, previous, nextPlayer) : current.session;
+          return { ...current, seasons, session };
+        }),
+      removeSquadPlayer: (seasonId, playerId) =>
+        setState((current) => ({
+          ...current,
+          seasons: current.seasons.map((season) =>
+            season.id === seasonId ? { ...season, players: season.players.filter((player) => player.id !== playerId) } : season,
+          ),
+          session: detachSquadPlayer(current.session, playerId),
+        })),
+      loadSampleSquad: (seasonId) =>
+        setState((current) => ({
+          ...current,
+          notice: "Sample squad loaded. Change any name before you take it to the pitch.",
+          seasons: current.seasons.map((season) =>
+            season.id === seasonId ? { ...season, players: samplePlayers() } : season,
+          ),
+        })),
+      applySquadToFrame: () =>
+        setState((current) => {
+          const season = activeOf(current);
+          if (season.players.length === 0) {
+            return { ...current, notice: "Add players on the season team sheet first." };
+          }
+          const active = phaseOf(current);
+          const activeFrame = frameOf(current, active);
+          const session = updateFrame(current.session, active.id, activeFrame.id, (item) => ({
+            ...item,
+            tokens: stampFromSquad(item.tokens, season.players, "home"),
+          }));
+          return withHistory(current, session, {
+            notice: `Home players now use ${season.name}, ${season.season}.`,
+          });
         }),
     };
   }, [state]);
