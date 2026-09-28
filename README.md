@@ -20,7 +20,10 @@ Sportfica is a tactics board for coaches. Draw 5-a-side, 7-a-side, 9-a-side, and
 - Write the session around what, where, who, when, and why, then print a session sheet or export JSON.
 - Copy a share link for the session you are looking at.
 
-The live board is stored in this browser. Open **Squad** for the season team sheet, then use those names on the board. Open **Clients** to create a player, save training sessions under that name, and record a competency chart as they develop. Use **Save** on the board, or **Save a copy** when you want to keep the previous version.
+The live board is stored in this browser.
+
+- **Coach Portal:** Open the tactics board to assemble training sessions, load pre-populated animated drills across 5s, 7s, 9s, and 11s, or manage season squads.
+- **Player Portal:** Open **Player Profiles** to review direct coach feedback on role and position (positive strengths and constructive areas to improve), practice 1-person ball mastery skills, and review suggested drills. Use **Save** on the board, or **Save a copy** to preserve earlier versions.
 
 ## Run it locally
 

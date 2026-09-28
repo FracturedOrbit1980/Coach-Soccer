@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { RadarChart } from "../components/RadarChart";
 import { Mark } from "../components/Mark";
 import { BALL_MASTERY_SKILLS } from "../data/ballMastery";
+import { DRILL_LIBRARY, findDrillById } from "../data/drills";
 import { TEMPLATES } from "../data/competencies";
 import { roleLabel } from "../lib/clients";
 import { useEditor } from "../store/editor";
@@ -16,6 +17,7 @@ export function ClientProfilePage() {
   const [compare, setCompare] = useState(true);
   const [axis, setAxis] = useState("");
   const [masteryTab, setMasteryTab] = useState<"dribbling" | "turning" | "moves" | "juggling">("dribbling");
+  const [viewRole, setViewRole] = useState<"player" | "coach">("player"); // Player view vs Coach view
 
   if (!client) {
     return (
@@ -234,38 +236,232 @@ export function ClientProfilePage() {
 
         {/* Right Column: Player Profile Bio, IDP Notes, Reviews & Linked Sessions */}
         <section className="profile-side">
+          {/* Active View Toggle: Player Perspective vs Coach Perspective */}
+          <div className="role-switch-container">
+            <span className="role-switch-label">Viewing As:</span>
+            <div className="tier-switch" role="group" aria-label="Role view mode">
+              <button
+                type="button"
+                aria-pressed={viewRole === "player"}
+                onClick={() => setViewRole("player")}
+              >
+                Player View
+              </button>
+              <button
+                type="button"
+                aria-pressed={viewRole === "coach"}
+                onClick={() => setViewRole("coach")}
+              >
+                Coach View
+              </button>
+            </div>
+          </div>
+
           {/* Distinction Banner: Player Profile vs Coach's Session Setup */}
-          <div className="role-callout">
-            <span className="role-tag">PLAYER PROFILE</span>
+          <div className={`role-callout ${viewRole === "player" ? "player-mode" : "coach-mode"}`}>
+            <span className="role-tag">
+              {viewRole === "player" ? "PLAYER VIEW · YOUR FEEDBACK & TRAINING" : "COACH VIEW · EDIT DEVELOPMENT & PLANS"}
+            </span>
             <p>
-              Dedicated individual profile for <strong>{client.name}</strong>. Track personal ball mastery, specific growth targets, and attach tailored training sessions.
+              {viewRole === "player"
+                ? `Welcome, ${client.name}. Here is your coach's direct feedback on your role (${client.position || "Player"}), development priorities, and suggested drills to work on.`
+                : `Managing ${client.name}. Update individual developmental milestones, assign role-specific drill homework, and provide positive & constructive feedback.`}
             </p>
           </div>
 
+          {/* ROLE & POSITION FEEDBACK SECTION (Positive & Constructive) */}
+          <div className="feedback-card">
+            <div className="row-between">
+              <h2>Role & Position Feedback</h2>
+              <span className="pos-badge">{client.position || "General Player"}</span>
+            </div>
+
+            <div className="feedback-positive">
+              <div className="feedback-head">
+                <span className="fb-icon positive">✓</span>
+                <strong>What You Do Well (Strengths in Role)</strong>
+              </div>
+              {viewRole === "coach" ? (
+                <textarea
+                  rows={2}
+                  value={idp.feedback?.positives ?? ""}
+                  placeholder="e.g. Tenacious in pressing, quick distribution, excellent scanning in half-spaces..."
+                  onChange={(e) =>
+                    editor.updateIndividualDevelopment(client.id, (prev) => ({
+                      ...prev,
+                      feedback: {
+                        positives: e.target.value,
+                        workOns: prev.feedback?.workOns ?? "",
+                        suggestedDrillIds: prev.feedback?.suggestedDrillIds ?? [],
+                      },
+                    }))
+                  }
+                />
+              ) : (
+                <p className="feedback-text">
+                  {idp.feedback?.positives || "No strengths logged yet. Ask your coach for feedback on your role."}
+                </p>
+              )}
+            </div>
+
+            <div className="feedback-negative">
+              <div className="feedback-head">
+                <span className="fb-icon negative">▲</span>
+                <strong>Areas to Improve (Constructive Feedback)</strong>
+              </div>
+              {viewRole === "coach" ? (
+                <textarea
+                  rows={2}
+                  value={idp.feedback?.workOns ?? ""}
+                  placeholder="e.g. Body shape when receiving under pressure; improve weak-foot disguise when turning..."
+                  onChange={(e) =>
+                    editor.updateIndividualDevelopment(client.id, (prev) => ({
+                      ...prev,
+                      feedback: {
+                        positives: prev.feedback?.positives ?? "",
+                        workOns: e.target.value,
+                        suggestedDrillIds: prev.feedback?.suggestedDrillIds ?? [],
+                      },
+                    }))
+                  }
+                />
+              ) : (
+                <p className="feedback-text">
+                  {idp.feedback?.workOns || "No work-ons recorded yet. Check in with your coach."}
+                </p>
+              )}
+            </div>
+
+            {/* SUGGESTED DRILLS TO IMPROVE ROLE & POSITION */}
+            <div className="suggested-drills-box">
+              <div className="row-between">
+                <strong>Suggested Drills to Improve Role</strong>
+                {viewRole === "coach" && (
+                  <select
+                    className="quick-add-drill"
+                    value=""
+                    onChange={(e) => {
+                      const drillIdToAdd = e.target.value;
+                      if (!drillIdToAdd) return;
+                      const currentDrills = idp.feedback?.suggestedDrillIds ?? [];
+                      if (!currentDrills.includes(drillIdToAdd)) {
+                        editor.updateIndividualDevelopment(client.id, (prev) => ({
+                          ...prev,
+                          feedback: {
+                            positives: prev.feedback?.positives ?? "",
+                            workOns: prev.feedback?.workOns ?? "",
+                            suggestedDrillIds: [...currentDrills, drillIdToAdd],
+                          },
+                        }));
+                      }
+                    }}
+                  >
+                    <option value="">+ Recommend Drill...</option>
+                    {DRILL_LIBRARY.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        [{d.format}s] {d.title}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {(idp.feedback?.suggestedDrillIds ?? []).length === 0 ? (
+                <p className="hint">No drills assigned yet.</p>
+              ) : (
+                <div className="drill-pills-list">
+                  {(idp.feedback?.suggestedDrillIds ?? []).map((did) => {
+                    const drill = findDrillById(did);
+                    if (!drill) return null;
+                    return (
+                      <div key={did} className="suggested-drill-pill">
+                        <div className="drill-pill-info">
+                          <span className="pill-badge">{drill.format}s</span>
+                          <strong>{drill.title}</strong>
+                          <small>{drill.category} · {drill.durationMinutes}′</small>
+                        </div>
+                        <div className="drill-pill-actions">
+                          <button
+                            type="button"
+                            className="btn primary"
+                            title="Load drill on board"
+                            onClick={() => {
+                              editor.loadDrillIntoPhase(drill.id, 0);
+                              navigate("/board");
+                            }}
+                          >
+                            Open on Board
+                          </button>
+                          {viewRole === "coach" && (
+                            <button
+                              type="button"
+                              className="icon-btn"
+                              title="Remove recommendation"
+                              onClick={() => {
+                                const filtered = (idp.feedback?.suggestedDrillIds ?? []).filter((id) => id !== did);
+                                editor.updateIndividualDevelopment(client.id, (prev) => ({
+                                  ...prev,
+                                  feedback: {
+                                    positives: prev.feedback?.positives ?? "",
+                                    workOns: prev.feedback?.workOns ?? "",
+                                    suggestedDrillIds: filtered,
+                                  },
+                                }));
+                              }}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="stack">
-            <h2>Player Information</h2>
+            <h2>Player Details</h2>
             <label className="field">
               <span>Player Full Name</span>
-              <input value={client.name} onChange={(event) => editor.updateClient(client.id, { name: event.target.value })} />
+              <input
+                disabled={viewRole === "player"}
+                value={client.name}
+                onChange={(event) => editor.updateClient(client.id, { name: event.target.value })}
+              />
             </label>
             <div className="split">
               <label className="field">
                 <span>Age / Category</span>
-                <input value={client.age} onChange={(event) => editor.updateClient(client.id, { age: event.target.value })} />
+                <input
+                  disabled={viewRole === "player"}
+                  value={client.age}
+                  onChange={(event) => editor.updateClient(client.id, { age: event.target.value })}
+                />
               </label>
               <label className="field">
                 <span>Primary Position</span>
-                <input value={client.position} onChange={(event) => editor.updateClient(client.id, { position: event.target.value })} />
+                <input
+                  disabled={viewRole === "player"}
+                  value={client.position}
+                  onChange={(event) => editor.updateClient(client.id, { position: event.target.value })}
+                />
               </label>
             </div>
             <div className="split">
               <label className="field">
                 <span>Club / Academy</span>
-                <input value={client.club} onChange={(event) => editor.updateClient(client.id, { club: event.target.value })} />
+                <input
+                  disabled={viewRole === "player"}
+                  value={client.club}
+                  onChange={(event) => editor.updateClient(client.id, { club: event.target.value })}
+                />
               </label>
               <label className="field">
                 <span>Dominant Foot</span>
                 <select
+                  disabled={viewRole === "player"}
                   value={client.dominantFoot ?? "Right"}
                   onChange={(e) => editor.updateClient(client.id, { dominantFoot: e.target.value as "Right" | "Left" | "Both" })}
                 >
@@ -282,47 +478,54 @@ export function ClientProfilePage() {
             <h2>Individual Development & Insights</h2>
             <label className="field">
               <span>Key Strengths</span>
-              <textarea
-                rows={2}
-                value={idp.strengths}
-                placeholder="e.g. Explosive change of pace, low centre of gravity..."
-                onChange={(e) => editor.updateIndividualDevelopment(client.id, { strengths: e.target.value })}
-              />
+              {viewRole === "coach" ? (
+                <textarea
+                  rows={2}
+                  value={idp.strengths}
+                  placeholder="e.g. Explosive change of pace, low centre of gravity..."
+                  onChange={(e) => editor.updateIndividualDevelopment(client.id, { strengths: e.target.value })}
+                />
+              ) : (
+                <p className="read-field">{idp.strengths || "None entered"}</p>
+              )}
             </label>
             <label className="field">
               <span>Growth & Development Areas</span>
-              <textarea
-                rows={2}
-                value={idp.growthAreas}
-                placeholder="e.g. Disguise on inside cut, turning under back-pressure..."
-                onChange={(e) => editor.updateIndividualDevelopment(client.id, { growthAreas: e.target.value })}
-              />
+              {viewRole === "coach" ? (
+                <textarea
+                  rows={2}
+                  value={idp.growthAreas}
+                  placeholder="e.g. Disguise on inside cut, turning under back-pressure..."
+                  onChange={(e) => editor.updateIndividualDevelopment(client.id, { growthAreas: e.target.value })}
+                />
+              ) : (
+                <p className="read-field">{idp.growthAreas || "None entered"}</p>
+              )}
             </label>
             <label className="field">
               <span>Target Milestone</span>
-              <input
-                value={idp.targetMilestone}
-                placeholder="e.g. 50 keep-ups, clean double scissors at match-speed..."
-                onChange={(e) => editor.updateIndividualDevelopment(client.id, { targetMilestone: e.target.value })}
-              />
+              {viewRole === "coach" ? (
+                <input
+                  value={idp.targetMilestone}
+                  placeholder="e.g. 50 keep-ups, clean double scissors at match-speed..."
+                  onChange={(e) => editor.updateIndividualDevelopment(client.id, { targetMilestone: e.target.value })}
+                />
+              ) : (
+                <p className="read-field">{idp.targetMilestone || "None entered"}</p>
+              )}
             </label>
             <label className="field">
               <span>Coach Insights & Homework</span>
-              <textarea
-                rows={3}
-                value={idp.insights}
-                placeholder="Specific 1-person ball mastery homework, video review notes, drill recommendations..."
-                onChange={(e) => editor.updateIndividualDevelopment(client.id, { insights: e.target.value })}
-              />
-            </label>
-            <label className="field">
-              <span>General Player Notes</span>
-              <textarea
-                rows={2}
-                value={client.notes}
-                placeholder="Physical notes, attendance, motivation..."
-                onChange={(event) => editor.updateClient(client.id, { notes: event.target.value })}
-              />
+              {viewRole === "coach" ? (
+                <textarea
+                  rows={3}
+                  value={idp.insights}
+                  placeholder="Specific 1-person ball mastery homework, video review notes, drill recommendations..."
+                  onChange={(e) => editor.updateIndividualDevelopment(client.id, { insights: e.target.value })}
+                />
+              ) : (
+                <p className="read-field">{idp.insights || "None entered"}</p>
+              )}
             </label>
           </div>
 

@@ -689,6 +689,281 @@ a { color: inherit; }
 .skill-cues { margin: 2px 0 6px; padding-left: 18px; font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
 .text-btn.success { color: var(--mint); }
 
+/* Role selector section on Landing page */
+.role-selector-section {
+  padding: 36px 6vw 24px;
+}
+.role-intro-sub {
+  color: var(--muted);
+  font-size: 1rem;
+  margin: 6px 0 0;
+}
+.role-split-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+.role-card {
+  position: relative;
+  background: rgba(16, 26, 38, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.role-card:hover {
+  transform: translateY(-2px);
+}
+.role-card.coach-portal {
+  border-color: rgba(60, 125, 255, 0.45);
+  box-shadow: 0 12px 30px rgba(10, 30, 60, 0.25);
+}
+.role-card.player-portal {
+  border-color: rgba(61, 206, 151, 0.45);
+  box-shadow: 0 12px 30px rgba(10, 50, 40, 0.25);
+}
+.role-card-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.coach-portal .role-card-badge {
+  background: rgba(60, 125, 255, 0.18);
+  color: #a8ccff;
+  border: 1px solid rgba(60, 125, 255, 0.4);
+}
+.player-portal .role-card-badge {
+  background: rgba(61, 206, 151, 0.18);
+  color: var(--mint);
+  border: 1px solid rgba(61, 206, 151, 0.4);
+}
+.role-card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coach-portal .role-card-icon {
+  background: rgba(60, 125, 255, 0.2);
+  color: #72a8ff;
+}
+.player-portal .role-card-icon {
+  background: rgba(61, 206, 151, 0.2);
+  color: var(--mint);
+}
+.role-card h3 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+.role-summary {
+  font-size: 0.94rem;
+  line-height: 1.45;
+  color: var(--mist);
+  margin: 0;
+}
+.role-duties {
+  margin: 8px 0;
+  padding-left: 20px;
+  font-size: 0.86rem;
+  color: #c5d3e2;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.role-duties strong {
+  color: var(--mist);
+}
+.role-cta {
+  margin-top: auto;
+  padding-top: 12px;
+}
+.btn.full-w {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  min-height: 42px;
+  font-size: 0.95rem;
+}
+
+/* Role switch in Player Profile page */
+.role-switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(10, 16, 24, 0.7);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.role-switch-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.role-callout.player-mode {
+  border-left-color: var(--mint);
+}
+.role-callout.player-mode .role-tag {
+  color: var(--mint);
+}
+.role-callout.coach-mode {
+  border-left-color: var(--saltire);
+}
+.role-callout.coach-mode .role-tag {
+  color: var(--saltire);
+}
+
+/* Feedback card styling */
+.feedback-card {
+  background: rgba(14, 24, 35, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.feedback-card h2 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+.pos-badge {
+  background: rgba(228, 182, 90, 0.15);
+  color: var(--gold);
+  border: 1px solid rgba(228, 182, 90, 0.35);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.feedback-positive, .feedback-negative {
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.feedback-positive {
+  background: rgba(12, 36, 26, 0.65);
+  border: 1px solid rgba(61, 206, 151, 0.35);
+}
+.feedback-negative {
+  background: rgba(42, 28, 18, 0.65);
+  border: 1px solid rgba(255, 141, 122, 0.35);
+}
+.feedback-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+.fb-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.fb-icon.positive {
+  background: rgba(61, 206, 151, 0.25);
+  color: var(--mint);
+}
+.fb-icon.negative {
+  background: rgba(255, 141, 122, 0.25);
+  color: var(--danger);
+}
+.feedback-text {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--mist);
+}
+.read-field {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--mist);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 10px;
+  border-radius: 8px;
+  line-height: 1.4;
+}
+.suggested-drills-box {
+  background: rgba(10, 16, 25, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.quick-add-drill {
+  background: #0c141d;
+  border: 1px solid var(--line);
+  color: var(--mist);
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  max-width: 170px;
+}
+.drill-pills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.suggested-drill-pill {
+  background: rgba(20, 32, 48, 0.8);
+  border: 1px solid rgba(60, 125, 255, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.drill-pill-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+}
+.drill-pill-info strong {
+  color: var(--mist);
+}
+.drill-pill-info small {
+  color: var(--muted);
+}
+.drill-pill-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.drill-pill-actions .btn {
+  font-size: 0.74rem;
+  padding: 4px 8px;
+  min-height: 26px;
+}
+
 @media (max-width: 720px) {
   .nav nav a:not(.nav-keep) { display: none; }
   .hero { padding-top: 8px; }
@@ -698,6 +973,8 @@ a { color: inherit; }
   .sheet { padding: 18px; }
   .sheet-grid, .sheet-meta { grid-template-columns: 1fr; }
   .profile-layout { grid-template-columns: 1fr; }
+  .role-split-grid { grid-template-columns: 1fr; }
+  .mastery-ratings-grid { grid-template-columns: 1fr; }
   .client-select { display: none; }
   .squad-row { grid-template-columns: 4rem minmax(0, 1fr) 36px; }
   .squad-row .pos { grid-column: 1 / -2; }

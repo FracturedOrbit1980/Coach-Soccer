@@ -171,58 +171,61 @@ export function Inspector() {
       <div className="inspector-body">
         {editor.inspectorTab === "session" && (
           <div className="stack">
-            <Field label="Theme" value={session.theme} onChange={(value, history) => editor.patchSession({ theme: value }, history)} />
-            <label className="field">
-              <span>Age group</span>
-              <select value={session.ageGroup} onChange={(event) => editor.patchSession({ ageGroup: event.target.value })}>
-                {ages.map((age) => (
-                  <option key={age}>{age}</option>
-                ))}
-              </select>
-            </label>
+            <div className="split">
+              <Field label="Theme" value={session.theme} placeholder="e.g. Breaking lines" onChange={(value, history) => editor.patchSession({ theme: value }, history)} />
+              <Field
+                label="Duration (min)"
+                type="number"
+                value={String(session.duration)}
+                onChange={(value, history) => editor.patchSession({ duration: Number(value) || 0 }, history)}
+              />
+            </div>
+            <div className="split">
+              <label className="field">
+                <span>Age group</span>
+                <select value={session.ageGroup} onChange={(event) => editor.patchSession({ ageGroup: event.target.value })}>
+                  {ages.map((age) => (
+                    <option key={age}>{age}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Moment</span>
+                <select
+                  value={session.moment}
+                  onChange={(event) => editor.patchSession({ moment: event.target.value as typeof session.moment })}
+                >
+                  {MOMENTS.map((moment) => (
+                    <option key={moment.id} value={moment.id}>
+                      {moment.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <Field
-              label="Duration (minutes)"
-              type="number"
-              value={String(session.duration)}
-              onChange={(value, history) => editor.patchSession({ duration: Number(value) || 0 }, history)}
-            />
-            <label className="field">
-              <span>Moment</span>
-              <select
-                value={session.moment}
-                onChange={(event) => editor.patchSession({ moment: event.target.value as typeof session.moment })}
-              >
-                {MOMENTS.map((moment) => (
-                  <option key={moment.id} value={moment.id}>
-                    {moment.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <Field
-              label="Principle"
+              label="Core principle"
               value={session.principle}
               multiline
+              placeholder="The main objective for the team..."
               onChange={(value, history) => editor.patchSession({ principle: value }, history)}
             />
             <div className="five">
-              <p className="field-label">What, where, who, when, why</p>
+              <p className="field-label">5 Ws Breakdown</p>
               {(["what", "where", "who", "when", "why"] as const).map((key) => (
                 <Field
                   key={key}
                   label={key[0].toUpperCase() + key.slice(1)}
                   value={session[key]}
-                  multiline
+                  placeholder={`${key.toUpperCase()} in the game`}
                   onChange={(value, history) => editor.patchSession({ [key]: value }, history)}
                 />
               ))}
             </div>
             <div className="opponent">
-              <p className="field-label">Opponent {session.tier === "11" ? "· 11-a-side wants a shape, a trigger, and a weakness" : ""}</p>
-              <Field label="Shape" value={session.opponent.shape} placeholder="4-3-3" onChange={(value, history) => editor.patchOpponent({ shape: value }, history)} />
-              <Field label="Build-up" value={session.opponent.buildUp} multiline onChange={(value, history) => editor.patchOpponent({ buildUp: value }, history)} />
-              <Field label="Press trigger" value={session.opponent.pressTrigger} multiline onChange={(value, history) => editor.patchOpponent({ pressTrigger: value }, history)} />
-              <Field label="Weakness" value={session.opponent.weakness} multiline onChange={(value, history) => editor.patchOpponent({ weakness: value }, history)} />
+              <p className="field-label">Opponent {session.tier === "11" ? "· 11-a-side shape & triggers" : ""}</p>
+              <Field label="Shape" value={session.opponent.shape} placeholder="e.g. 4-3-3" onChange={(value, history) => editor.patchOpponent({ shape: value }, history)} />
+              <Field label="Build-up & Weakness" value={session.opponent.buildUp} multiline placeholder="Opponent tendencies and spaces to exploit..." onChange={(value, history) => editor.patchOpponent({ buildUp: value }, history)} />
             </div>
             <p className="scaffold-note">{scaffold.summary}</p>
           </div>
@@ -259,11 +262,11 @@ export function Inspector() {
               </div>
             </div>
 
-            {/* Drill Library Section with Dropdown Selection */}
+            {/* Quick Drill Library Loader */}
             <div className="drill-library-box">
               <div className="row-between">
                 <span className="field-label">
-                  <Sparkles size={14} className="inline-icon" /> Drill Library
+                  <Sparkles size={14} className="inline-icon" /> Drill Library & Variants
                 </span>
                 <div className="scope-toggle" role="group" aria-label="Drill format scope">
                   <button
@@ -272,7 +275,7 @@ export function Inspector() {
                     aria-pressed={drillFormatScope === "current"}
                     onClick={() => setDrillFormatScope("current")}
                   >
-                    {session.tier}s
+                    {session.tier}s drills
                   </button>
                   <button
                     type="button"
@@ -280,13 +283,13 @@ export function Inspector() {
                     aria-pressed={drillFormatScope === "all"}
                     onClick={() => setDrillFormatScope("all")}
                   >
-                    All
+                    All formats
                   </button>
                 </div>
               </div>
 
               <label className="field">
-                <span>Select pre-populated drill</span>
+                <span>Select pre-built drill</span>
                 <select
                   value={drillId}
                   aria-label="Drill library dropdown"
@@ -295,7 +298,7 @@ export function Inspector() {
                     setVariantIdx(0);
                   }}
                 >
-                  <option value="">Choose a drill from library...</option>
+                  <option value="">Choose a drill to load...</option>
                   {(["Warm-up & Ball Mastery", "Rondo & Possession", "Functional & Positional", "Game & Transition"] as const).map(
                     (cat) => {
                       const drillsInCat = availableDrills.filter((d) => d.category === cat);
@@ -325,7 +328,7 @@ export function Inspector() {
                   <p className="drill-desc">{activeDrill.organisation}</p>
 
                   <label className="field">
-                    <span>Drill variant / progression</span>
+                    <span>Variant / Progression</span>
                     <select
                       value={variantIdx}
                       aria-label="Select drill variant"
@@ -339,56 +342,53 @@ export function Inspector() {
                     </select>
                   </label>
 
-                  {activeDrill.variants[variantIdx] && (
-                    <p className="variant-note">
-                      <strong>Focus:</strong> {activeDrill.variants[variantIdx].description}
-                    </p>
-                  )}
-
                   <div className="drill-actions">
                     <button
                       type="button"
                       className="btn primary"
                       onClick={() => editor.loadDrillIntoPhase(activeDrill.id, variantIdx)}
                     >
-                      <Play size={13} /> Load into Current Phase
+                      <Play size={13} /> Load to Current Phase
                     </button>
                     <button
                       type="button"
                       className="btn ghost"
                       onClick={() => editor.addDrillAsPhase(activeDrill.id, variantIdx)}
                     >
-                      + Add as New Phase
+                      + Add New Phase
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Add Blank Phase Dropdown */}
-            <label className="field">
-              <span>+ Add blank phase</span>
-              <select
-                value=""
-                onChange={(event) => {
-                  if (event.target.value) editor.addPhase(event.target.value as PhaseType);
-                }}
-              >
-                <option value="">Choose phase type...</option>
-                {scaffold.phaseTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {PHASE_META[type].label} ({PHASE_META[type].hint})
-                  </option>
-                ))}
-              </select>
-            </label>
+            {/* Phase Setup Details */}
+            <div className="split">
+              <Field label="Phase title" value={phase.title} onChange={(value, history) => editor.patchPhase({ title: value }, history)} />
+              <label className="field">
+                <span>+ Blank phase</span>
+                <select
+                  value=""
+                  onChange={(event) => {
+                    if (event.target.value) editor.addPhase(event.target.value as PhaseType);
+                  }}
+                >
+                  <option value="">Add type...</option>
+                  {scaffold.phaseTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {PHASE_META[type].label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
 
-            <Field label="Phase title" value={phase.title} onChange={(value, history) => editor.patchPhase({ title: value }, history)} />
             <div className="split">
               <Field label="Minutes" type="number" value={String(phase.minutes)} onChange={(value, history) => editor.patchPhase({ minutes: Number(value) || 0 }, history)} />
               <Field label="Length m" type="number" value={String(phase.lengthM)} onChange={(value, history) => editor.patchPhase({ lengthM: Number(value) || 0 }, history)} />
               <Field label="Width m" type="number" value={String(phase.widthM)} onChange={(value, history) => editor.patchPhase({ widthM: Number(value) || 0 }, history)} />
             </div>
+
             <label className="field">
               <span>Pitch zone</span>
               <select value={phase.zone} onChange={(event) => editor.patchPhase({ zone: event.target.value as typeof phase.zone })}>
@@ -399,23 +399,26 @@ export function Inspector() {
                 ))}
               </select>
             </label>
+
             <Field
-              label="Organisation"
+              label="Organisation & Rules"
               value={phase.organisation}
               multiline
               placeholder={PHASE_META[phase.type].hint}
               onChange={(value, history) => editor.patchPhase({ organisation: value }, history)}
             />
+
             <StringList
               label="Coaching points"
               items={phase.coachingPoints}
-              placeholder="What you will say"
+              placeholder="Key teaching cues"
               onChange={(items, history) => editor.patchPhase({ coachingPoints: items }, history)}
             />
+
             <StringList
               label="Guided questions"
               items={phase.questions}
-              placeholder="Ask, then wait"
+              placeholder="Prompt for player insight"
               onChange={(items, history) => editor.patchPhase({ questions: items }, history)}
             />
 

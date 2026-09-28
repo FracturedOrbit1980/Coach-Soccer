@@ -136,6 +136,12 @@ export interface BallMasteryAssessment {
   weakFoot: number; // 0-10
 }
 
+export interface PlayerFeedback {
+  positives: string; // Strengths, what player does well in role & position
+  workOns: string;   // Constructive development areas to improve
+  suggestedDrillIds?: string[]; // IDs of drills suggested to improve this player's role
+}
+
 export interface IndividualDevelopment {
   strengths: string;
   growthAreas: string;
@@ -143,6 +149,7 @@ export interface IndividualDevelopment {
   insights: string;
   ballMastery: BallMasteryAssessment;
   completedSkillIds?: string[];
+  feedback?: PlayerFeedback;
 }
 
 export interface PlayerProfile {

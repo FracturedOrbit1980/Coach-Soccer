@@ -36,6 +36,11 @@ export function defaultIndividualDevelopment(): IndividualDevelopment {
       weakFoot: 5,
     },
     completedSkillIds: [],
+    feedback: {
+      positives: "High work-rate, sharp scanning before receiving, and brave when taking players on 1v1.",
+      workOns: "Look to release the ball quicker when double-teamed; continue working on left-foot turning disguise.",
+      suggestedDrillIds: ["5s-1v1-dual-goals", "7s-buildup-pivot"],
+    },
   };
 }
 

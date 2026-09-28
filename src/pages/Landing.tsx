@@ -1,14 +1,12 @@
-import { Map, MessageCircle, PersonStanding, Waypoints } from "lucide-react";
+import { ClipboardList, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mark } from "../components/Mark";
 import { Pitch } from "../components/Pitch";
-import { FORMATS, PILLARS, SCAFFOLDS } from "../data/scaffolding";
+import { FORMATS, SCAFFOLDS } from "../data/scaffolding";
 import { createSample } from "../data/samples";
 import { sampleFrame } from "../lib/animate";
 import { useEditor } from "../store/editor";
-
-const ICONS = [MessageCircle, Map, PersonStanding, Waypoints];
 
 export function Landing() {
   const editor = useEditor();
@@ -46,34 +44,35 @@ export function Landing() {
           <Mark />
           <span>
             <strong>Sportfica</strong>
-            <small>Tactics board</small>
+            <small>Tactics & Player Hub</small>
           </span>
         </Link>
         <nav>
+          <a href="#roles">Choose Role</a>
           <a href="#formats">Formats</a>
-          <a href="#session">The session</a>
-          <Link to="/squad" className="nav-keep">Squad</Link>
+          <Link to="/board" className="nav-keep">Tactics Board</Link>
           <Link to="/clients" className="nav-keep">Player Profiles</Link>
-          <Link to="/board" className="nav-keep">Open board</Link>
+          <Link to="/squad" className="nav-keep">Squad</Link>
         </nav>
       </header>
 
+      {/* Hero Section */}
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">Grassroots to GDL and pro</p>
-          <h1>The session, drawn the way your team plays.</h1>
+          <p className="eyebrow">Grassroots · Academy · GDL · Pro</p>
+          <h1>Tactics made simple. Player growth made clear.</h1>
           <p className="lede">
-            Sportfica is a tactics board for 5-a-side, 7-a-side, 9-a-side, and 11-a-side. Place the mannequins, turn the mini goals, and keep the squad’s names from the first grassroots age through to GDL and pro.
+            Sportfica brings session design and player development together. Fast animated drill building for coaches; direct role feedback and ball mastery for players.
           </p>
           <div className="hero-actions">
             <Link className="btn primary" to="/board">
-              Continue in the board
+              Open Tactics Board
             </Link>
-            <Link className="btn ghost" to="/sheet">
-              Open the session sheet
+            <Link className="btn ghost" to="/clients">
+              Player Profiles & Feedback
             </Link>
           </div>
-          <p className="continue">On this browser: {editor.session.title}</p>
+          <p className="continue">Active session: <strong>{editor.session.title}</strong></p>
         </div>
         <div className="hero-stage">
           <div className="hero-pitch">
@@ -91,30 +90,75 @@ export function Landing() {
             />
           </div>
           <div className="hero-caption">
-            <span>7-a-side sample</span>
-            <strong>Jump the pivot</strong>
-            <span>Press space on the board to play it yourself.</span>
+            <span>7-a-side build-up</span>
+            <strong>2-3-1 Pivot Animation</strong>
+            <span>Press space on board to play.</span>
           </div>
         </div>
       </section>
 
-      <section className="band" id="session">
-        {PILLARS.map((pillar, index) => {
-          const Icon = ICONS[index];
-          return (
-            <article key={pillar.id}>
-              <Icon size={18} />
-              <h2>{pillar.title}</h2>
-              <p>{pillar.copy}</p>
-            </article>
-          );
-        })}
+      {/* CLEAR ROLE DEFINITIONS: COACH vs PLAYER */}
+      <section className="role-selector-section" id="roles">
+        <div className="section-head text-center">
+          <p className="eyebrow">Select Your Role</p>
+          <h2>Coach or Player</h2>
+          <p className="role-intro-sub">Two distinct sides of Sportfica engineered for your responsibilities.</p>
+        </div>
+
+        <div className="role-split-grid">
+          {/* COACH ROLE CARD */}
+          <div className="role-card coach-portal">
+            <div className="role-card-badge">Coach Portal</div>
+            <div className="role-card-icon">
+              <ClipboardList size={28} />
+            </div>
+            <h3>Coach</h3>
+            <p className="role-summary">
+              Responsible for training sessions, tactical drills, and individual player feedback and development.
+            </p>
+            <ul className="role-duties">
+              <li><strong>Assemble Training Sessions:</strong> Quick drill builder with pre-populated animated library across 5s, 7s, 9s, and 11s.</li>
+              <li><strong>Player Feedback & IDP:</strong> Provide direct positive feedback and constructive development areas per player.</li>
+              <li><strong>Tactical Drills & Rotation:</strong> Place lifelike mannequins, rotate mini goals, and animate triggers.</li>
+              <li><strong>Season Squad Sheet:</strong> Maintain shirt numbers, positions, and rosters that carry directly into drills.</li>
+            </ul>
+            <div className="role-cta">
+              <Link to="/board" className="btn primary full-w">
+                Open Coach Board
+              </Link>
+            </div>
+          </div>
+
+          {/* PLAYER ROLE CARD */}
+          <div className="role-card player-portal">
+            <div className="role-card-badge">Player Portal</div>
+            <div className="role-card-icon">
+              <User size={28} />
+            </div>
+            <h3>Player</h3>
+            <p className="role-summary">
+              Views coach feedback and suggested drills to improve role and position (positive and constructive).
+            </p>
+            <ul className="role-duties">
+              <li><strong>Role & Position Feedback:</strong> View what you do well (positives) and constructive areas to improve.</li>
+              <li><strong>Suggested Drills:</strong> Access drill recommendations from your coach tailored to your position.</li>
+              <li><strong>1-Person Ball Mastery:</strong> Practice solo drills for dribbling, turning, moves to beat, and juggling.</li>
+              <li><strong>Competency Progress:</strong> Radar development chart and milestone tracking over time.</li>
+            </ul>
+            <div className="role-cta">
+              <Link to="/clients" className="btn ghost full-w">
+                Open Player Profiles
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
 
+      {/* Formats Grid: 5s, 7s, 9s, 11s */}
       <section className="tiers" id="formats">
         <div className="section-head">
-          <p className="eyebrow">Age and numbers</p>
-          <h2>Five, seven, nine, or eleven. Grassroots through to GDL and pro.</h2>
+          <p className="eyebrow">Age & Pitch Numbers</p>
+          <h2>5s, 7s, 9s, and 11s. Grassroots through to GDL and pro.</h2>
         </div>
         <div className="tier-grid">
           {FORMATS.map((format) => {
@@ -129,49 +173,22 @@ export function Landing() {
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
-                <Link to={`/board?sample=${format}`}>Open the {scaffold.name} sample</Link>
+                <Link to={`/board?sample=${format}`}>Open {scaffold.name} sample</Link>
               </article>
             );
           })}
         </div>
       </section>
 
-      <section className="split-feature">
-        <article>
-          <p className="eyebrow">Animation studio</p>
-          <h2>Keyframes, not a video editor.</h2>
-          <p>
-            Record the start picture, the trigger, and the outcome. Scrub the timeline, change the speed, and keep an onion-skin of the previous frame so the run is honest.
-          </p>
-        </article>
-        <article>
-          <p className="eyebrow">Season squad</p>
-          <h2>Names that survive the next drill.</h2>
-          <p>
-            Keep a team sheet for the season. Drop a shape or place a home mannequin and the shirt number and surname come with it. Change the sheet once and the open picture follows.
-          </p>
-        </article>
-        <article>
-          <p className="eyebrow">Session plan</p>
-          <h2>A sheet you can print.</h2>
-          <p>
-            Phases, area, coaching points, guided questions, and the opponent model sit beside the pitch. Export JSON, copy a share link, or print the session sheet.
-          </p>
-        </article>
-        <article>
-          <p className="eyebrow">Opponent read</p>
-          <h2>Suggest the press.</h2>
-          <p>
-            5-a-side and 7-a-side step the nearest two in. 9-a-side curves a unit of three. 11-a-side jumps the line and narrows the rest. It adds a keyframe you can edit.
-          </p>
-        </article>
-      </section>
-
       <footer className="site-footer">
         <p>
-          Sportfica keeps the squad, the pictures, and the session on this browser. From the first grassroots age group to GDL and pro.
+          Sportfica · Tactical session builder & individual player development hub.
         </p>
-        <Link to="/board">Start from the current board</Link>
+        <div className="footer-links">
+          <Link to="/board">Tactics Board</Link>
+          <Link to="/clients">Player Profiles</Link>
+          <Link to="/squad">Season Squad</Link>
+        </div>
       </footer>
     </div>
   );
