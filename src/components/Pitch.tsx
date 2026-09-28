@@ -534,7 +534,7 @@ function PlayerMannequin({
 }: {
   token: Token;
   prefix: string;
-  events: string;
+  events: "all" | "none";
   selected: boolean;
 }) {
   const home = token.team !== "away";
