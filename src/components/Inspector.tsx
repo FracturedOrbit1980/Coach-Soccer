@@ -9,7 +9,7 @@ const TABS: { id: InspectorTab; label: string }[] = [
   { id: "session", label: "Session" },
   { id: "phase", label: "Phase" },
   { id: "method", label: "Method" },
-  { id: "pillars", label: "Pillars" },
+  { id: "pillars", label: "Focus" },
 ];
 
 export function Inspector() {
@@ -92,6 +92,35 @@ export function Inspector() {
                 onChange={(value, history) => editor.patchToken(selected.id, { role: value }, history)}
               />
             </>
+          )}
+          {selected?.kind === "goal" && (
+            <label className="field">
+              <span>Angle {Math.round(selected.rotation ?? 0)}°</span>
+              <input
+                type="range"
+                min={0}
+                max={359}
+                aria-label="Mini goal angle"
+                value={Math.round(selected.rotation ?? 0)}
+                onChange={(event) => editor.patchToken(selected.id, { rotation: Number(event.target.value) }, false)}
+              />
+              <span className="squad-actions">
+                <button
+                  type="button"
+                  className="text-btn"
+                  onClick={() => editor.patchToken(selected.id, { rotation: ((selected.rotation ?? 0) + 345) % 360 }, true)}
+                >
+                  −15°
+                </button>
+                <button
+                  type="button"
+                  className="text-btn"
+                  onClick={() => editor.patchToken(selected.id, { rotation: ((selected.rotation ?? 0) + 15) % 360 }, true)}
+                >
+                  +15°
+                </button>
+              </span>
+            </label>
           )}
           {selected?.kind === "marker" && (
             <Field
@@ -177,7 +206,7 @@ export function Inspector() {
               ))}
             </div>
             <div className="opponent">
-              <p className="field-label">Opponent model {session.tier === "A" ? "· required at UEFA A" : ""}</p>
+              <p className="field-label">Opponent {session.tier === "11" ? "· 11-a-side wants a shape, a trigger, and a weakness" : ""}</p>
               <Field label="Shape" value={session.opponent.shape} placeholder="4-3-3" onChange={(value, history) => editor.patchOpponent({ shape: value }, history)} />
               <Field label="Build-up" value={session.opponent.buildUp} multiline onChange={(value, history) => editor.patchOpponent({ buildUp: value }, history)} />
               <Field label="Press trigger" value={session.opponent.pressTrigger} multiline onChange={(value, history) => editor.patchOpponent({ pressTrigger: value }, history)} />
@@ -296,7 +325,7 @@ export function Inspector() {
         {editor.inspectorTab === "method" && (
           <div className="stack">
             <p className="hint">
-              The check follows the four pillars and the what / where / who / when / why picture. It does not grade the drawing.
+              The check looks at the coach, the pitch, the player, and the game, plus what, where, who, when, and why. It does not grade the drawing.
             </p>
             {report.checks.map((check) => (
               <button key={check.id} type="button" className={check.ok ? "check ok" : "check"} onClick={() => editor.setInspectorTab(check.tab)}>

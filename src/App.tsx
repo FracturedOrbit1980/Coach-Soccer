@@ -14,8 +14,8 @@ function Title() {
   useEffect(() => {
     document.title =
       location.pathname === "/"
-        ? "Scottish FA UEFA Licence Tactical Platform"
-        : `${session.title} · SFA Tactics`;
+        ? "Sportfika"
+        : `${session.title} · Sportfika`;
   }, [location.pathname, session.title]);
   return null;
 }

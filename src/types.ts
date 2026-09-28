@@ -1,4 +1,5 @@
-export type Tier = "C" | "B" | "A";
+export type Format = "5" | "7" | "9" | "11";
+export type Tier = Format;
 
 export type Moment =
   | "in-possession"
@@ -70,6 +71,8 @@ export interface Token {
   squadPlayerId?: string;
   role?: string;
   label?: string;
+  /** Degrees clockwise. Used by mini goals. */
+  rotation?: number;
   x: number;
   y: number;
 }

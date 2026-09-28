@@ -17,7 +17,7 @@ export function SquadPage() {
         <Link to="/" className="brand">
           <Mark />
           <span>
-            <strong>SFA Tactics</strong>
+            <strong>Sportfika</strong>
             <small>Season squad</small>
           </span>
         </Link>

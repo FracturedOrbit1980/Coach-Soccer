@@ -22,9 +22,9 @@ import {
   blankSession,
   cloneFrame,
   cloneSession,
-  isSession,
   leadPhase,
   nextNumber,
+  normalizeSession,
   now,
   playerCount,
   updateFrame,
@@ -110,19 +110,24 @@ function loadPersisted(): PersistShape | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const data = JSON.parse(raw) as Partial<PersistShape>;
-    if (!isSession(data.session)) return null;
+    const session = normalizeSession(data.session);
+    if (!session) return null;
     const library = Array.isArray(data.library)
-      ? data.library.filter((entry) => entry && isSession(entry.session))
+      ? data.library.flatMap((entry) => {
+          const saved = normalizeSession(entry?.session);
+          if (!entry || !saved) return [];
+          return [{ ...entry, tier: saved.tier, session: saved }];
+        })
       : [];
     const clients = Array.isArray(data.clients) ? data.clients.filter((entry) => isClient(entry)) : [];
     const roster = readSeasons(data);
     return {
-      session: data.session,
+      session,
       library,
       clients,
       staffRole: isStaffRole(data.staffRole) ? data.staffRole : "coach",
-      activePhaseId: data.activePhaseId ?? data.session.phases[0].id,
-      activeFrameId: data.activeFrameId ?? data.session.phases[0].frames[0].id,
+      activePhaseId: data.activePhaseId ?? session.phases[0].id,
+      activeFrameId: data.activeFrameId ?? session.phases[0].frames[0].id,
       seasons: roster.seasons,
       activeSeasonId: roster.activeSeasonId,
     };
@@ -153,7 +158,7 @@ function initialState(): EditorState {
       panelOpen: false,
     };
   }
-  const session = createSample("B");
+  const session = createSample("7");
   const lead = leadPhase(session);
   const seeded = starterSeason();
   return {
@@ -175,7 +180,7 @@ function initialState(): EditorState {
     drawTeam: "home",
     past: [],
     future: [],
-    notice: "UEFA B sample is on the board. Press space to play the press.",
+    notice: "7-a-side sample is on the board. Press space to play the press.",
     inspectorTab: "phase",
     panelOpen: false,
   };

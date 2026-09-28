@@ -60,6 +60,7 @@ export function Pitch({
 }: PitchProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: string; dx: number; dy: number; moved: boolean } | null>(null);
+  const rotateDrag = useRef<{ id: string; start: Point; base: number; moved: boolean } | null>(null);
   const drawing = useRef<Point[] | null>(null);
   const [draft, setDraft] = useState<Point[] | null>(null);
   const prefix = `p${frame.id.replace(/[^a-zA-Z0-9_-]/g, "")}`;
@@ -97,6 +98,10 @@ export function Pitch({
         const token = frame.tokens.find((item) => item.id === tokenId);
         if (!token) return;
         onSelect?.(tokenId, "token");
+        if (target?.closest("[data-rotate]") && token.kind === "goal") {
+          rotateDrag.current = { id: tokenId, start: point, base: token.rotation ?? 0, moved: false };
+          return;
+        }
         drag.current = { id: tokenId, dx: token.x - point.x, dy: token.y - point.y, moved: false };
         return;
       }
@@ -118,6 +123,19 @@ export function Pitch({
   function onPointerMove(event: PointerEvent<SVGSVGElement>) {
     if (readOnly) return;
     const point = toPitch(event);
+    if (rotateDrag.current) {
+      const token = frame.tokens.find((item) => item.id === rotateDrag.current?.id);
+      if (!token || !rotateDrag.current) return;
+      if (!rotateDrag.current.moved) {
+        rotateDrag.current.moved = true;
+        onCheckpoint?.();
+      }
+      const start = angleDeg(token, rotateDrag.current.start);
+      const now = angleDeg(token, point);
+      const next = (rotateDrag.current.base + (now - start) + 3600) % 360;
+      onPatchToken?.(rotateDrag.current.id, { rotation: Math.round(next) });
+      return;
+    }
     if (drag.current) {
       if (!drag.current.moved) {
         drag.current.moved = true;
@@ -147,6 +165,7 @@ export function Pitch({
     }
     drawing.current = null;
     drag.current = null;
+    rotateDrag.current = null;
     setDraft(null);
   }
 
@@ -354,6 +373,11 @@ function PitchDefs({ prefix }: { prefix: string }) {
         <stop offset="42%" stopColor="#d23b3b" />
         <stop offset="100%" stopColor="#6c1414" />
       </linearGradient>
+      <radialGradient id={`${prefix}-dummy-head`} cx="34%" cy="30%" r="72%">
+        <stop offset="0%" stopColor="#ffc2c2" />
+        <stop offset="55%" stopColor="#e05858" />
+        <stop offset="100%" stopColor="#8a2020" />
+      </radialGradient>
       <radialGradient id={`${prefix}-ground`} cx="50%" cy="50%" r="50%">
         <stop offset="0%" stopColor="rgba(0,0,0,0.5)" />
         <stop offset="100%" stopColor="rgba(0,0,0,0)" />
@@ -481,25 +505,41 @@ function TokenGlyph({
   if (token.kind === "mannequin") {
     return (
       <g data-token={token.id} transform={`translate(${point.x} ${point.y})`} style={{ pointerEvents: events }}>
-        {selected && <rect x="-14" y="-32" width="28" height="46" rx="10" fill="none" stroke="#e4b65a" strokeWidth="1.6" />}
-        <ellipse cy="12" rx="12" ry="3.6" fill={`url(#${prefix}-ground)`} />
-        <rect x="-10" y="7" width="20" height="3.4" rx="1.2" fill="#2c2c2c" />
-        <rect x="-1.4" y="1" width="2.8" height="7" fill="#4a4a4a" />
-        <path d="M-8 -20 C-11 -11 -10 0 -7 2.2 H7 C10 0 11 -11 8 -20 C4.4 -25 -4.4 -25 -8 -20 Z" fill={`url(#${prefix}-dummy)`} />
-        <path d="M1.2 -22 C5.4 -17 6.6 -8 5.4 1 H2.6 C3.8 -8 2.4 -16 0.4 -21 Z" fill="rgba(0,0,0,0.22)" />
-        <path d="M-4.6 -20 C-6.2 -14 -5.5 -8 -4.2 -4" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.3" strokeLinecap="round" />
-        <circle cy="-26" r="5.8" fill={`url(#${prefix}-head)`} />
-        <ellipse cx="-1.5" cy="-27.6" rx="2.1" ry="1.2" fill="rgba(255,255,255,0.4)" />
+        {selected && <rect x="-16" y="-52" width="32" height="66" rx="14" fill="none" stroke="#e4b65a" strokeWidth="1.5" />}
+        <ellipse cy="10" rx="14" ry="4" fill={`url(#${prefix}-ground)`} />
+        <rect x="-11" y="7" width="22" height="3.2" rx="1.4" fill="#2a2a2a" />
+        <path d="M-7.2 -12 C-9 -4 -9 4 -7.6 9 H-3.4 C-4 3 -3.6 -4 -2.6 -12 Z" fill="#8d2424" />
+        <path d="M2.2 -12 C3.4 -4 4.2 4 3.2 9 H7.6 C8.8 3 8.2 -5 6.4 -12 Z" fill="#a83232" />
+        <path d="M-8 -20 H8 L7 -11 H-7 Z" fill={`url(#${prefix}-dummy)`} />
+        <path d="M-9.2 -36 C-11.4 -29 -10.6 -23 -8.4 -20 H8.4 C10.6 -23 11.4 -29 9.2 -36 C5.8 -39 -5.8 -39 -9.2 -36 Z" fill={`url(#${prefix}-dummy)`} />
+        <path d="M2 -37 C6.4 -33 8 -27 7.2 -20.6 H3.6 C4.6 -27 3.2 -33 1 -36.2 Z" fill="rgba(0,0,0,0.18)" />
+        <path d="M-6 -35.5 C-7.6 -30 -7 -25.5 -5.6 -22" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M-8.2 -33 C-14 -30 -15.6 -24 -13.6 -18.5 C-12.2 -17.2 -10.8 -18 -11 -20 C-12 -24.5 -10.6 -29.5 -8.2 -31.6 Z" fill="#b42323" />
+        <path d="M8.2 -33 C14 -30 15.6 -24 13.6 -18.5 C12.2 -17.2 10.8 -18 11 -20 C12 -24.5 10.6 -29.5 8.2 -31.6 Z" fill="#9a1e1e" />
+        <circle cy="-43" r="6.4" fill={`url(#${prefix}-dummy-head)`} />
+        <path d="M-5.4 -44.2 Q0 -49.4 5.4 -44 Q3.4 -46 0 -46.1 Q-3.4 -46 -5.4 -44.2 Z" fill="#6e1818" />
+        <path d="M-2.2 -44.6 Q0 -43.8 2.2 -44.8" fill="none" stroke="rgba(80,10,10,0.55)" strokeWidth="0.7" />
+        <ellipse cx="-1.6" cy="-45.4" rx="2.2" ry="1.3" fill="rgba(255,255,255,0.35)" />
       </g>
     );
   }
   if (token.kind === "goal") {
+    const rotation = token.rotation ?? 0;
     return (
       <g data-token={token.id} transform={`translate(${point.x} ${point.y})`} style={{ pointerEvents: events }}>
-        <ellipse cy="14" rx="20" ry="4" fill={`url(#${prefix}-ground)`} />
-        <path d="M-18 -12 V12 H18 V-12" fill="rgba(255,255,255,0.08)" stroke={selected ? "#fff" : "#f7fbf8"} strokeWidth="2.4" />
-        <path d="M-18 -12 L-26 -4 V16 L-18 12" fill="rgba(0,0,0,0.18)" stroke="#d7e4dc" strokeWidth="1.3" />
-        <path d="M-12 -12 V12 M-6 -12 V12 M0 -12 V12 M6 -12 V12 M12 -12 V12" stroke="rgba(247,251,248,0.35)" strokeWidth="0.8" />
+        <ellipse cy="16" rx="22" ry="4.2" fill={`url(#${prefix}-ground)`} />
+        <g transform={`rotate(${rotation})`}>
+          <path d="M-24 -6 V12 H24 V-6" fill="rgba(255,255,255,0.1)" stroke={selected ? "#fff" : "#f7fbf8"} strokeWidth="2.6" />
+          <path d="M-24 -6 L-33 0 V16 L-24 12" fill="rgba(0,0,0,0.22)" stroke="#d7e4dc" strokeWidth="1.3" />
+          <path d="M-18 -6 V12 M-9 -6 V12 M0 -6 V12 M9 -6 V12 M18 -6 V12" stroke="rgba(247,251,248,0.45)" strokeWidth="0.8" />
+          <path d="M-24 4 H24" stroke="rgba(255,255,255,0.28)" strokeWidth="0.8" />
+          {selected && (
+            <>
+              <line x1="0" y1="-6" x2="0" y2="-30" stroke="#e4b65a" strokeWidth="1.5" />
+              <circle data-rotate="1" cy="-34" r="5.5" fill="#e4b65a" stroke="#1a1408" strokeWidth="1" />
+            </>
+          )}
+        </g>
       </g>
     );
   }
@@ -526,6 +566,12 @@ function TokenGlyph({
   return <PlayerMannequin token={token} prefix={prefix} events={events} selected={selected} />;
 }
 
+function angleDeg(origin: Point, pointer: Point): number {
+  const a = toSvg(origin);
+  const b = toSvg(pointer);
+  return (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+}
+
 function PlayerMannequin({
   token,
   prefix,
@@ -542,40 +588,51 @@ function PlayerMannequin({
   const fill = keeper
     ? `url(#${prefix}-${home ? "gk-kit" : "gk-away-kit"})`
     : `url(#${prefix}-${home ? "home-kit" : "away-kit"})`;
-  const arm = keeper ? (home ? "#0c6a48" : "#8a3e14") : home ? "#12386e" : "#9a7438";
+  const arm = keeper ? (home ? "#0c6a48" : "#8a3e14") : home ? "#16386e" : "#8d6a32";
   const ink = !home && !keeper ? "#1c1408" : "#f7fbff";
   const trim = keeper ? (home ? "#e9fff6" : "#ffe4cc") : home ? "#e4b65a" : "#1d3f86";
+  const sock = home || keeper ? "#f4f7fb" : "#243044";
   const name = shortName(token.name);
   const point = toSvg(token);
   return (
     <g data-token={token.id} transform={`translate(${point.x} ${point.y})`} style={{ pointerEvents: events }}>
-      <rect x="-18" y="-46" width="36" height="70" fill="transparent" />
-      {selected && <rect x="-16" y="-44" width="32" height="54" rx="14" fill="none" stroke="#e4b65a" strokeWidth="1.7" />}
-      <ellipse cx="0" cy="4" rx="13" ry="4.2" fill={`url(#${prefix}-ground)`} />
-      <path d="M-6.4 -10 L-8.6 1.4 Q-5.4 3.4 -2.2 1.2 L-1.1 -10 Z" fill="#1a1a1a" />
-      <path d="M1.1 -10 L2.4 1.2 Q5.6 3.4 8.6 1.4 L6.4 -10 Z" fill="#101010" />
-      <path d="M-9 0.2 H-2 Q-1.2 2.8 -4.8 3 Q-9.6 3 -9 0.2 Z" fill={trim} />
-      <path d="M2 0.2 H9 Q9.6 3 4.8 3 Q1.2 2.8 2 0.2 Z" fill={trim} />
+      <rect x="-22" y="-58" width="44" height="84" fill="transparent" />
+      {selected && <rect x="-18" y="-54" width="36" height="66" rx="16" fill="none" stroke="#e4b65a" strokeWidth="1.6" />}
+      <ellipse cx="1" cy="8" rx="15" ry="4.6" fill={`url(#${prefix}-ground)`} />
+      <path d="M-8 -14 C-10.2 -6 -10.4 2 -9.2 9.2 L-4.4 9.4 C-4.8 2 -4.4 -6 -3.2 -13.6 Z" fill="#17191d" />
+      <path d="M-9.4 6.8 H-4 C-3.8 9.8 -4.8 11.4 -6.8 11.5 C-9.2 11.4 -9.6 9.2 -9.4 6.8 Z" fill={sock} />
+      <path d="M-10.2 10.4 H-3.4 C-3.2 13.2 -5 14.2 -6.8 14 C-10.2 13.8 -10.6 12 -10.2 10.4 Z" fill="#121212" />
+      <path d="M1.4 -14 C2.8 -5 3.8 2 2.8 9.6 L8 8.8 C9.4 1.5 8.6 -6 6.6 -13.8 Z" fill="#2c2e34" />
+      <path d="M2.6 6.4 H8 C8.2 9.6 6.8 11.4 4.8 11.4 C2.6 11.2 2.4 9 2.6 6.4 Z" fill={sock} />
+      <path d="M1.8 10.2 H8.6 C9 13.2 6.8 14.2 4.6 14 C1.8 13.6 1.4 12 1.8 10.2 Z" fill="#181818" />
+      <path d="M-8.4 -22 H8.4 L7.2 -12.4 H-7.2 Z" fill={fill} />
+      <path d="M1.6 -21.6 H8.2 L7.2 -12.6 H2.2 Z" fill="rgba(0,0,0,0.2)" />
       <path
-        d="M-8.6 -25.2 C-10.6 -18 -9.4 -12 -7.2 -9.4 H7.2 C9.4 -12 10.6 -18 8.6 -25.2 C5.2 -29 -5.2 -29 -8.6 -25.2 Z"
+        d="M-9.6 -38.2 C-12 -31 -11.4 -24 -8.8 -20.8 H8.8 C11.4 -24 12 -31 9.6 -38.2 C6.2 -41.6 -6.2 -41.6 -9.6 -38.2 Z"
         fill={fill}
         stroke="rgba(0,0,0,0.28)"
-        strokeWidth="0.6"
+        strokeWidth="0.55"
       />
-      <path d="M2 -27 C6.6 -24 8.6 -18 7.2 -10.4 H4 C5.6 -17 4.2 -23 1 -26 Z" fill="rgba(0,0,0,0.24)" />
-      <path d="M-5.6 -26 C-7.2 -20 -6.5 -15 -5 -11.5" fill="none" stroke="rgba(255,255,255,0.48)" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M-7.6 -22.5 C-14 -18 -14.8 -12 -11.4 -8" fill="none" stroke={arm} strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M7.6 -22.5 C14 -18 14.8 -12 11.4 -8" fill="none" stroke={arm} strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M-3.3 -26.6 Q0 -24.4 3.3 -26.6" fill="none" stroke={trim} strokeWidth="1.35" strokeLinecap="round" />
-      <circle cy="-34" r="6.4" fill={`url(#${prefix}-head)`} stroke="rgba(0,0,0,0.18)" strokeWidth="0.5" />
-      <ellipse cx="-1.6" cy="-36" rx="2.4" ry="1.5" fill="rgba(255,255,255,0.42)" />
-      <text textAnchor="middle" y="-15.2" fill={ink} fontSize="12" fontFamily="Barlow Condensed, sans-serif" fontWeight="700">
+      <path d="M2.2 -39.4 C7.4 -35.6 9.6 -29 8.4 -21.4 H4.2 C5.6 -28.4 4 -35 1.2 -38.4 Z" fill="rgba(0,0,0,0.2)" />
+      <path d="M-6.6 -37.4 C-8.4 -31 -7.8 -26 -6.2 -22.6" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M-8.8 -35.2 C-16 -32 -18.4 -24.5 -16 -17.2 C-14.4 -15.6 -12.6 -16.6 -12.8 -19 C-14.2 -24.4 -12.6 -31 -8.8 -33.6 Z" fill={arm} />
+      <path d="M8.8 -35.2 C16 -32 18.4 -24.5 16 -17.2 C14.4 -15.6 12.6 -16.6 12.8 -19 C14.2 -24.4 12.6 -31 8.8 -33.6 Z" fill={arm} />
+      <circle cx="-15.6" cy="-16.4" r="2.15" fill={`url(#${prefix}-head)`} />
+      <circle cx="15.8" cy="-16.4" r="2.15" fill={`url(#${prefix}-head)`} />
+      <path d="M-3.6 -38.6 Q0 -36 3.6 -38.6" fill="none" stroke={trim} strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M-2.4 -40.6 H2.4 V-37.2 H-2.4 Z" fill="#e2b184" />
+      <circle cy="-46.4" r="7.1" fill={`url(#${prefix}-head)`} stroke="rgba(0,0,0,0.15)" strokeWidth="0.4" />
+      <path d="M-6.4 -47.6 Q0 -54.4 6.5 -47.4 Q4.2 -50 0 -50.2 Q-4.2 -50 -6.4 -47.6 Z" fill="#2a221c" />
+      <ellipse cx="-6.2" cy="-46" rx="1.35" ry="1.9" fill="#c48962" />
+      <path d="M-2.4 -47.8 Q0 -47 2.6 -48" fill="none" stroke="#8a583c" strokeWidth="0.7" strokeLinecap="round" />
+      <ellipse cx="-2" cy="-48.8" rx="2.7" ry="1.6" fill="rgba(255,255,255,0.38)" />
+      <text textAnchor="middle" y="-28" fill={ink} fontSize="12" fontFamily="Barlow Condensed, sans-serif" fontWeight="700">
         {token.number ?? ""}
       </text>
       {(name || token.role) && (
         <text
           textAnchor="middle"
-          y="16"
+          y="22"
           fill="#f7fbf8"
           fontSize="11"
           fontFamily="Barlow Condensed, sans-serif"

@@ -1,5 +1,5 @@
 import { PHASE_META, SCAFFOLDS } from "../data/scaffolding";
-import type { Frame, Phase, PhaseType, Session, Tier, Token } from "../types";
+import type { Format, Frame, Phase, PhaseType, Session, Tier, Token } from "../types";
 import { uid } from "./id";
 
 export function now(): string {
@@ -10,10 +10,27 @@ export function cloneSession(session: Session): Session {
   return structuredClone(session);
 }
 
+export function asFormat(value: unknown): Format | null {
+  if (value === "5" || value === "7" || value === "9" || value === "11") return value;
+  if (value === "C") return "5";
+  if (value === "B") return "7";
+  if (value === "A") return "11";
+  return null;
+}
+
+export function normalizeSession(value: unknown): Session | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Session;
+  const tier = asFormat(raw.tier);
+  if (!tier) return null;
+  const session = tier === raw.tier ? raw : { ...raw, tier };
+  return isSession(session) ? session : null;
+}
+
 export function isSession(value: unknown): value is Session {
   if (!value || typeof value !== "object") return false;
   const session = value as Partial<Session>;
-  if (session.tier !== "C" && session.tier !== "B" && session.tier !== "A") return false;
+  if (session.tier !== "5" && session.tier !== "7" && session.tier !== "9" && session.tier !== "11") return false;
   if (typeof session.title !== "string" || !Array.isArray(session.phases) || session.phases.length === 0) {
     return false;
   }
@@ -43,7 +60,7 @@ export function cloneFrame(frame: Frame): Frame {
 
 export function blankPhase(type: PhaseType, tier: Tier): Phase {
   const meta = PHASE_META[type];
-  const scale = tier === "C" ? 0.75 : tier === "B" ? 0.9 : 1;
+  const scale = tier === "5" ? 0.62 : tier === "7" ? 0.75 : tier === "9" ? 0.9 : 1;
   return {
     id: uid(),
     type,
@@ -60,13 +77,13 @@ export function blankPhase(type: PhaseType, tier: Tier): Phase {
   };
 }
 
-export function blankSession(tier: Tier = "B"): Session {
+export function blankSession(tier: Tier = "7"): Session {
   const phase = blankPhase("warmup", tier);
   return {
     id: uid(),
     title: "Untitled session",
     tier,
-    ageGroup: tier === "C" ? "U12–U14" : tier === "B" ? "U15–U16" : "Senior",
+    ageGroup: tier === "5" ? "Grassroots U8" : tier === "7" ? "Grassroots U11" : tier === "9" ? "U14" : "U18",
     duration: phase.minutes,
     theme: "",
     moment: "in-possession",

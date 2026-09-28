@@ -39,10 +39,10 @@ export function suggestPress(frame: Frame, tier: Tier): PressResult {
   }
 
   const ranked = [...away].sort((a, b) => metresBetween(a, ball) - metresBetween(b, ball));
-  const count = tier === "C" ? 2 : tier === "B" ? 3 : 4;
+  const count = tier === "5" || tier === "7" ? 2 : tier === "9" ? 3 : 4;
   const pressers = new Set(ranked.slice(0, Math.min(count, ranked.length)).map((token) => token.id));
-  const factor = tier === "C" ? 0.48 : tier === "B" ? 0.58 : 0.66;
-  const gap = tier === "C" ? 4.5 : 3.8;
+  const factor = tier === "5" ? 0.45 : tier === "7" ? 0.52 : tier === "9" ? 0.58 : 0.66;
+  const gap = tier === "11" ? 3.8 : tier === "9" ? 4.2 : 4.8;
 
   const tokens = frame.tokens.map((token) => {
     if (token.kind === "gk") return token;
@@ -50,7 +50,7 @@ export function suggestPress(frame: Frame, tier: Tier): PressResult {
       const next = stepToward(token, ball, factor, gap);
       return { ...token, ...next };
     }
-    if (tier === "A" && token.team === "away" && token.kind === "player") {
+    if ((tier === "11" || tier === "9") && token.team === "away" && token.kind === "player") {
       return {
         ...token,
         x: clamp(token.x + (ball.x - token.x) * 0.14, 1.5, 98.5),
@@ -60,8 +60,8 @@ export function suggestPress(frame: Frame, tier: Tier): PressResult {
     return token;
   });
 
-  const zoneW = tier === "A" ? 18 : 13;
-  const zoneH = tier === "A" ? 30 : 20;
+  const zoneW = tier === "11" ? 18 : tier === "9" ? 16 : 13;
+  const zoneH = tier === "11" ? 30 : tier === "9" ? 24 : 20;
   const strokes: Stroke[] = [
     ...frame.strokes,
     {
@@ -91,9 +91,9 @@ export function suggestPress(frame: Frame, tier: Tier): PressResult {
   }
 
   const summary =
-    tier === "C"
+    tier === "5" || tier === "7"
       ? "Nearest two step in and lock the ball. Individual pressure, the rest stay."
-      : tier === "B"
+      : tier === "9"
         ? "The unit of three curves the press and takes away the inside pass."
         : "The line jumps on the trigger. Ball-side locks, the rest narrow and keep cover.";
 

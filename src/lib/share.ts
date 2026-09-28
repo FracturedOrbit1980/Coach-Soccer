@@ -1,5 +1,5 @@
 import type { Session } from "../types";
-import { isSession, slug } from "./session";
+import { normalizeSession, slug } from "./session";
 
 function bytesToBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -28,8 +28,9 @@ export async function decodeSession(payload: string): Promise<Session> {
     .pipeThrough(new DecompressionStream("gzip"));
   const text = await new Response(stream).text();
   const data: unknown = JSON.parse(text);
-  if (!isSession(data)) throw new Error("This link does not contain a session.");
-  return data;
+  const session = normalizeSession(data);
+  if (!session) throw new Error("This link does not contain a session.");
+  return session;
 }
 
 function bytesToBase64Buffer(payload: string): Uint8Array<ArrayBuffer> {

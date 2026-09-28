@@ -120,8 +120,8 @@ function sampleC(): Session {
   return {
     id: "sample-c",
     title: "Break the first line",
-    tier: "C",
-    ageGroup: "U12–U14",
+    tier: "5",
+    ageGroup: "Grassroots U9",
     duration: 50,
     theme: "First touch away from pressure",
     moment: "in-possession",
@@ -215,8 +215,8 @@ function sampleB(): Session {
   return {
     id: "sample-b",
     title: "Jump the pivot",
-    tier: "B",
-    ageGroup: "U15–U16",
+    tier: "7",
+    ageGroup: "U12",
     duration: 60,
     theme: "Press the centre-back's pass into the 6",
     moment: "out-of-possession",
@@ -373,7 +373,7 @@ function sampleA(): Session {
   const game = phase({
     id: "a-game",
     type: "game",
-    title: "11v11 — jump or drop on the 6",
+    title: "Match — jump or drop on the 6",
     minutes: 45,
     lengthM: 105,
     widthM: 68,
@@ -424,8 +424,8 @@ function sampleA(): Session {
   return {
     id: "sample-a",
     title: "High press versus a 4-3-3",
-    tier: "A",
-    ageGroup: "Senior",
+    tier: "11",
+    ageGroup: "GDL",
     duration: 90,
     theme: "Opponent game model — jump the 6",
     moment: "out-of-possession",
@@ -482,7 +482,11 @@ function sampleA(): Session {
 }
 
 export function createSample(tier: Tier): Session {
-  if (tier === "C") return sampleC();
-  if (tier === "A") return sampleA();
+  if (tier === "5") return sampleC();
+  if (tier === "11") return sampleA();
+  if (tier === "9") {
+    const session = sampleB();
+    return { ...session, id: uid(), tier: "9", ageGroup: "U14", title: "Find the free player in the 9" };
+  }
   return sampleB();
 }

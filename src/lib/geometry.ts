@@ -56,6 +56,52 @@ export const FORMATIONS: Record<string, Slot[]> = {
     { role: "R", x: 18, y: 68 },
     { role: "9", x: 36, y: 50 },
   ],
+  "2-3-1": [
+    { role: "LB", x: 20, y: 28 },
+    { role: "RB", x: 20, y: 72 },
+    { role: "LM", x: 36, y: 24 },
+    { role: "CM", x: 32, y: 50 },
+    { role: "RM", x: 36, y: 76 },
+    { role: "ST", x: 52, y: 50 },
+  ],
+  "2-1-2-1": [
+    { role: "LB", x: 18, y: 30 },
+    { role: "RB", x: 18, y: 70 },
+    { role: "DM", x: 30, y: 50 },
+    { role: "LM", x: 44, y: 28 },
+    { role: "RM", x: 44, y: 72 },
+    { role: "ST", x: 58, y: 50 },
+  ],
+  "3-2-3": [
+    { role: "LCB", x: 18, y: 30 },
+    { role: "CB", x: 16, y: 50 },
+    { role: "RCB", x: 18, y: 70 },
+    { role: "LCM", x: 34, y: 38 },
+    { role: "RCM", x: 34, y: 62 },
+    { role: "LW", x: 52, y: 18 },
+    { role: "ST", x: 58, y: 50 },
+    { role: "RW", x: 52, y: 82 },
+  ],
+  "3-3-2": [
+    { role: "LCB", x: 18, y: 30 },
+    { role: "CB", x: 16, y: 50 },
+    { role: "RCB", x: 18, y: 70 },
+    { role: "LM", x: 36, y: 22 },
+    { role: "CM", x: 32, y: 50 },
+    { role: "RM", x: 36, y: 78 },
+    { role: "LST", x: 54, y: 40 },
+    { role: "RST", x: 54, y: 60 },
+  ],
+  "2-3-2-1": [
+    { role: "LB", x: 20, y: 16 },
+    { role: "RB", x: 20, y: 84 },
+    { role: "LCM", x: 34, y: 32 },
+    { role: "DM", x: 30, y: 50 },
+    { role: "RCM", x: 34, y: 68 },
+    { role: "LW", x: 50, y: 22 },
+    { role: "RW", x: 50, y: 78 },
+    { role: "ST", x: 64, y: 50 },
+  ],
   "3-2-1": [
     { role: "LCB", x: 36, y: 32 },
     { role: "CB", x: 32, y: 50 },
@@ -125,9 +171,17 @@ export const FORMATIONS: Record<string, Slot[]> = {
   ],
 };
 
+function gkDepth(name: string): number {
+  if (["2-2", "Diamond", "3-1"].includes(name)) return 22;
+  if (["2-3-1", "3-2-1", "2-1-2-1"].includes(name)) return 16;
+  if (["3-2-3", "3-3-2", "2-3-2-1"].includes(name)) return 10;
+  return 6;
+}
+
 export function tokensForFormation(team: Team, name: string): Token[] {
   const slots = FORMATIONS[name] ?? FORMATIONS["4-3-3"];
-  const gkX = team === "home" ? (name === "3-2-1" ? 22 : 6) : name === "3-2-1" ? 78 : 94;
+  const depth = gkDepth(name);
+  const gkX = team === "home" ? depth : 100 - depth;
   const tokens: Token[] = [
     {
       id: uid(),

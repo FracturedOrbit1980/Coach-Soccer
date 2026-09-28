@@ -14,22 +14,24 @@ export interface Scaffold {
   watchouts: string[];
 }
 
+export const FORMATS: Tier[] = ["5", "7", "9", "11"];
+
 export const SCAFFOLDS: Record<Tier, Scaffold> = {
-  C: {
-    tier: "C",
-    name: "UEFA C",
-    headline: "Fundamentals and small-sided games",
+  "5": {
+    tier: "5",
+    name: "5-a-side",
+    headline: "Touches, pictures, and a small goal",
     summary:
-      "Keep the picture simple, the area tight, and the repetition high. Coach the player in front of you: first touch, body shape, and one idea at a time.",
+      "Grassroots football. Keep the area tight, the repetition high, and the idea to one thing the player can use on the next touch.",
     focus: [
-      "Technical detail under light pressure",
-      "Recognise a free player",
-      "Small-sided games with a clear outcome",
-      "Interventions the player can use on the next rep",
+      "First touch and body shape",
+      "See the free player",
+      "Score, or keep the ball, in a small game",
+      "A coaching point short enough to say at a stop",
     ],
     phaseTypes: ["warmup", "technical", "ssg"],
     formations: ["2-2", "Diamond", "3-1"],
-    maxPlayers: 7,
+    maxPlayers: 5,
     questions: [
       "Where is the free player?",
       "Can your first touch take you away from the press?",
@@ -38,25 +40,53 @@ export const SCAFFOLDS: Record<Tier, Scaffold> = {
     ],
     interventions: ["Demo", "Freeze", "Concurrent", "Q&A"],
     watchouts: [
-      "Stay at 7v7 or smaller.",
+      "Stay at 5v5 or smaller.",
       "One coaching point at a time.",
       "If the game gets noisy, shrink the area before you add a rule.",
     ],
   },
-  B: {
-    tier: "B",
-    name: "UEFA B",
-    headline: "Units, functions, and transitions",
+  "7": {
+    tier: "7",
+    name: "7-a-side",
+    headline: "A shape, without the full pitch",
     summary:
-      "Coach a unit inside the team game. The practice needs a real opponent problem, a trigger, and a picture for both moments.",
+      "The age where a back line and a front line show up. Coach the relationship between them, still inside a game the players can see.",
     focus: [
-      "Units of the back line, midfield, and front line",
-      "Functional practices with realistic pressure",
-      "Triggers to press, drop, or play forward",
-      "Both phases of a transition",
+      "A back line that steps together",
+      "A forward who pins, or comes short",
+      "The first pass out of pressure",
+      "Both moments of a turnover",
     ],
     phaseTypes: ["warmup", "technical", "functional", "ssg"],
-    formations: ["3-2-1", "4-3-3", "4-2-3"],
+    formations: ["2-3-1", "3-2-1", "2-1-2-1"],
+    maxPlayers: 7,
+    questions: [
+      "When do the two at the back step?",
+      "Who is free if the ball goes inside?",
+      "Can the forward come and still threaten the goal?",
+      "What does the rest of the team do on the turnover?",
+    ],
+    interventions: ["Freeze", "Demo", "Guided discovery", "Concurrent"],
+    watchouts: [
+      "Name the unit you are coaching.",
+      "Keep the area inside 60 metres.",
+      "A mini goal should face the game you actually want.",
+    ],
+  },
+  "9": {
+    tier: "9",
+    name: "9-a-side",
+    headline: "Width, a unit, and a trigger",
+    summary:
+      "Youth football with enough players to coach a press and a wide player. The practice needs an opponent problem and a moment to jump.",
+    focus: [
+      "Units of the back line, midfield, and front line",
+      "A trigger to press, drop, or play forward",
+      "Width and the half-space",
+      "The picture on both sides of a turnover",
+    ],
+    phaseTypes: ["warmup", "technical", "functional", "ssg"],
+    formations: ["3-2-3", "3-3-2", "2-3-2-1"],
     maxPlayers: 9,
     questions: [
       "What is the trigger to jump?",
@@ -66,22 +96,22 @@ export const SCAFFOLDS: Record<Tier, Scaffold> = {
     ],
     interventions: ["Freeze", "Walkthrough", "Guided discovery", "Concurrent"],
     watchouts: [
-      "Name the unit you are coaching.",
       "Put the trigger in When, not only in the theme.",
       "A functional practice needs an opponent action, not only a mannequin.",
+      "Keep one principle through the whole session.",
     ],
   },
-  A: {
-    tier: "A",
-    name: "UEFA A",
-    headline: "Game model and opponent strategy",
+  "11": {
+    tier: "11",
+    name: "11-a-side",
+    headline: "The full game, from GDL to pro",
     summary:
-      "The session is a piece of the game model. Coach the team against a specific opponent idea, and let the 11v11 confirm the principle.",
+      "Match shape. Coach the team against a specific opponent idea, and let the game confirm the principle.",
     focus: [
-      "11v11 structure and a named game model",
+      "A named shape and one principle",
       "Opponent build-up, trigger, and weakness",
-      "One principle carried through the whole session",
-      "Connections between units, not isolated shapes",
+      "Connections between units",
+      "The same idea in the practice and the match",
     ],
     phaseTypes: ["warmup", "technical", "functional", "ssg", "game"],
     formations: ["4-3-3", "4-2-3-1", "3-5-2", "4-4-2"],
@@ -90,12 +120,12 @@ export const SCAFFOLDS: Record<Tier, Scaffold> = {
       "How does the press change if their 6 drops between the centre-backs?",
       "What is the cue for the far-side winger?",
       "Where is the cover if we jump and they play through the first line?",
-      "Which game-model principle is this repetition for?",
+      "Which principle is this repetition for?",
     ],
     interventions: ["Walkthrough", "Guided discovery", "Terminal", "Q&A"],
     watchouts: [
       "Fill the opponent model before you draw the press.",
-      "The 11v11 should test the same principle as the functional practice.",
+      "The match should test the same principle as the practice.",
       "Prefer a constraint that keeps the game alive over a long stoppage.",
     ],
   },
@@ -138,8 +168,8 @@ export const PHASE_META: Record<
     zone: "middle-third",
   },
   game: {
-    label: "11v11 game",
-    hint: "The principle under match conditions.",
+    label: "Match",
+    hint: "The principle in the format you are coaching.",
     minutes: 30,
     length: 105,
     width: 68,
@@ -165,7 +195,25 @@ export const ZONES: { id: Zone; label: string }[] = [
   { id: "penalty-box", label: "Penalty box" },
 ];
 
-export const AGE_GROUPS = ["U8–U11", "U12–U14", "U15–U16", "U17–U19", "Senior", "Adult amateur"];
+export const AGE_GROUPS = [
+  "Grassroots U6",
+  "Grassroots U7",
+  "Grassroots U8",
+  "Grassroots U9",
+  "Grassroots U10",
+  "Grassroots U11",
+  "U12",
+  "U13",
+  "U14",
+  "U15",
+  "U16",
+  "U17",
+  "U18",
+  "U19",
+  "U21",
+  "GDL",
+  "Pro",
+];
 
 export const BEHAVIOURS = [
   "Positive and specific",

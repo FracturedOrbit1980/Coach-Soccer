@@ -22,7 +22,7 @@ export function SheetPage() {
         <header className="sheet-head">
           <Mark size={36} />
           <div>
-            <p>Scottish FA coach education · UEFA {session.tier} Licence</p>
+            <p>Sportfika · {session.tier}-a-side · {session.ageGroup}</p>
             <h1>{session.title}</h1>
           </div>
           <div className="sheet-score">

@@ -31,14 +31,16 @@ export function validate(session: Session): { score: number; max: number; checks
   const animated = session.phases.some((phase) => phase.frames.length > 1);
 
   const tierOk = (() => {
-    if (session.tier === "C") {
+    if (session.tier === "5") {
       const hasSsg = session.phases.some((phase) => phase.type === "ssg");
-      const hasGame = session.phases.some((phase) => phase.type === "game");
-      const small = session.phases.every((phase) => phase.lengthM <= 55);
-      return hasSsg && !hasGame && small;
+      const small = session.phases.every((phase) => phase.lengthM <= 40);
+      return hasSsg && small;
     }
-    if (session.tier === "B") {
-      return session.phases.some((phase) => phase.type === "functional") && session.when.trim().length > 8;
+    if (session.tier === "7") {
+      return session.phases.some((phase) => phase.type === "ssg") && session.phases.every((phase) => phase.lengthM <= 60);
+    }
+    if (session.tier === "9") {
+      return session.phases.some((phase) => phase.type === "functional" || phase.type === "ssg") && session.when.trim().length > 8;
     }
     return (
       session.phases.some((phase) => phase.type === "game") &&
@@ -49,11 +51,13 @@ export function validate(session: Session): { score: number; max: number; checks
   })();
 
   const tierDetail =
-    session.tier === "C"
-      ? "Include a small-sided game, keep areas at 55m or under, and leave 11v11 for later licences."
-      : session.tier === "B"
-        ? "Add a functional phase and write the trigger in When."
-        : "Add an 11v11 phase and complete the opponent shape, trigger, and weakness.";
+    session.tier === "5"
+      ? "Include a small-sided game and keep areas at 40m or under."
+      : session.tier === "7"
+        ? "Include a game and keep areas at 60m or under."
+        : session.tier === "9"
+          ? "Add a functional or small-sided phase and write the trigger in When."
+          : "Add a match phase and complete the opponent shape, trigger, and weakness.";
 
   const checks: Check[] = [
     { id: "title", label: "Session title", detail: "Name the session so a colleague can find it.", ok: filled(session.title) && session.title !== "Untitled session", tab: "session" },

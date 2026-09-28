@@ -1,12 +1,11 @@
 import { Download, FolderOpen, PanelRight, Redo2, Save, Share2, Undo2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { SCAFFOLDS } from "../data/scaffolding";
+import { FORMATS, SCAFFOLDS } from "../data/scaffolding";
 import { downloadSession, shareUrl } from "../lib/share";
-import { isSession } from "../lib/session";
+import { normalizeSession } from "../lib/session";
 import { validate } from "../lib/validate";
 import { useEditor } from "../store/editor";
-import type { Tier } from "../types";
 import { Mark } from "./Mark";
 
 export function TopBar() {
@@ -31,11 +30,12 @@ export function TopBar() {
   async function onImport(file: File) {
     try {
       const data: unknown = JSON.parse(await file.text());
-      if (!isSession(data)) {
+      const session = normalizeSession(data);
+      if (!session) {
         editor.setNotice("That file is not a session from this board.");
         return;
       }
-      editor.replaceSession(data);
+      editor.replaceSession(session);
     } catch {
       editor.setNotice("Could not read that JSON file.");
     }
@@ -46,8 +46,8 @@ export function TopBar() {
       <Link to="/" className="brand">
         <Mark size={26} />
         <span>
-          <strong>SFA Tactics</strong>
-          <small>UEFA licence board</small>
+          <strong>Sportfika</strong>
+          <small>Tactics board</small>
         </span>
       </Link>
       <input
@@ -63,10 +63,10 @@ export function TopBar() {
           titleArmed.current = false;
         }}
       />
-      <div className="tier-switch" role="group" aria-label="Licence tier">
-        {(["C", "B", "A"] as Tier[]).map((tier) => (
+      <div className="tier-switch" role="group" aria-label="Game format">
+        {FORMATS.map((tier) => (
           <button key={tier} type="button" aria-pressed={editor.session.tier === tier} onClick={() => editor.setTier(tier)}>
-            {tier}
+            {tier}s
           </button>
         ))}
       </div>
@@ -134,7 +134,7 @@ export function TopBar() {
           <button type="button" onClick={() => { editor.newSession(); setMenu(null); }}>
             New blank session
           </button>
-          {(["C", "B", "A"] as Tier[]).map((tier) => (
+          {FORMATS.map((tier) => (
             <button key={tier} type="button" onClick={() => { editor.loadSample(tier); setMenu(null); }}>
               Load {SCAFFOLDS[tier].name} sample
             </button>
@@ -170,7 +170,7 @@ export function TopBar() {
               <button type="button" onClick={() => { editor.loadLibrary(entry.id); setMenu(null); }}>
                 <b>{entry.name}</b>
                 <small>
-                  {editor.clients.find((client) => client.id === (entry.clientId ?? entry.session.clientId))?.name ?? "No client"} · UEFA {entry.tier} · {new Date(entry.updatedAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  {editor.clients.find((client) => client.id === (entry.clientId ?? entry.session.clientId))?.name ?? "No client"} · {SCAFFOLDS[entry.tier].name} · {new Date(entry.updatedAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </small>
               </button>
               <button type="button" className="text-btn danger" onClick={() => editor.deleteLibrary(entry.id)}>

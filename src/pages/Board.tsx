@@ -8,6 +8,7 @@ import { TopBar } from "../components/TopBar";
 import { ZONES } from "../data/scaffolding";
 import { sampleFrame } from "../lib/animate";
 import { decodeSession } from "../lib/share";
+import { asFormat } from "../lib/session";
 import { useEditor } from "../store/editor";
 import type { PitchView, Tier } from "../types";
 
@@ -46,8 +47,9 @@ export function BoardPage() {
         .catch(() => editorRef.current.setNotice("Could not open that shared session."));
       return;
     }
-    if (sample === "C" || sample === "B" || sample === "A") {
-      editorRef.current.loadSample(sample);
+    const format = asFormat(sample);
+    if (format) {
+      editorRef.current.loadSample(format);
       navigate("/board", { replace: true });
     }
   }, [navigate, params]);

@@ -3,17 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mark } from "../components/Mark";
 import { Pitch } from "../components/Pitch";
-import { PILLARS, SCAFFOLDS } from "../data/scaffolding";
+import { FORMATS, PILLARS, SCAFFOLDS } from "../data/scaffolding";
 import { createSample } from "../data/samples";
 import { sampleFrame } from "../lib/animate";
 import { useEditor } from "../store/editor";
-import type { Tier } from "../types";
 
 const ICONS = [MessageCircle, Map, PersonStanding, Waypoints];
 
 export function Landing() {
   const editor = useEditor();
-  const demo = useMemo(() => createSample("B"), []);
+  const demo = useMemo(() => createSample("7"), []);
   const phase = demo.phases.find((item) => item.frames.length > 1) ?? demo.phases[0];
   const [t, setT] = useState(0);
 
@@ -46,13 +45,13 @@ export function Landing() {
         <Link to="/" className="brand">
           <Mark />
           <span>
-            <strong>SFA Tactics</strong>
-            <small>Coach education</small>
+            <strong>Sportfika</strong>
+            <small>Tactics board</small>
           </span>
         </Link>
         <nav>
-          <a href="#tiers">Licences</a>
-          <a href="#pillars">Four pillars</a>
+          <a href="#formats">Formats</a>
+          <a href="#session">The session</a>
           <Link to="/squad" className="nav-keep">Squad</Link>
           <Link to="/clients" className="nav-keep">Clients</Link>
           <Link to="/board" className="nav-keep">Open board</Link>
@@ -61,10 +60,10 @@ export function Landing() {
 
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">Scottish FA · UEFA C, B, and A</p>
-          <h1>The session, drawn the way the game is taught.</h1>
+          <p className="eyebrow">Grassroots to GDL and pro</p>
+          <h1>The session, drawn the way your team plays.</h1>
           <p className="lede">
-            A tactical board for coach education. Place the picture, animate the trigger, and check the plan against the four pillars before you walk out to the pitch.
+            Sportfika is a tactics board for 5-a-side, 7-a-side, 9-a-side, and 11-a-side. Place the mannequins, turn the mini goals, and keep the squad’s names from the first grassroots age through to GDL and pro.
           </p>
           <div className="hero-actions">
             <Link className="btn primary" to="/board">
@@ -92,14 +91,14 @@ export function Landing() {
             />
           </div>
           <div className="hero-caption">
-            <span>UEFA B sample</span>
+            <span>7-a-side sample</span>
             <strong>Jump the pivot</strong>
             <span>Press space on the board to play it yourself.</span>
           </div>
         </div>
       </section>
 
-      <section className="band" id="pillars">
+      <section className="band" id="session">
         {PILLARS.map((pillar, index) => {
           const Icon = ICONS[index];
           return (
@@ -112,17 +111,17 @@ export function Landing() {
         })}
       </section>
 
-      <section className="tiers" id="tiers">
+      <section className="tiers" id="formats">
         <div className="section-head">
-          <p className="eyebrow">Dynamic scaffolding</p>
-          <h2>The licence changes the board, not just the badge.</h2>
+          <p className="eyebrow">Age and numbers</p>
+          <h2>Five, seven, nine, or eleven. Grassroots through to GDL and pro.</h2>
         </div>
         <div className="tier-grid">
-          {(["C", "B", "A"] as Tier[]).map((tier) => {
-            const scaffold = SCAFFOLDS[tier];
+          {FORMATS.map((format) => {
+            const scaffold = SCAFFOLDS[format];
             return (
-              <article key={tier} className={`tier-card tier-${tier.toLowerCase()}`}>
-                <p>UEFA {tier}</p>
+              <article key={format} className={`tier-card format-${format}`}>
+                <p>{scaffold.name}</p>
                 <h3>{scaffold.headline}</h3>
                 <p>{scaffold.summary}</p>
                 <ul>
@@ -130,7 +129,7 @@ export function Landing() {
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
-                <Link to={`/board?sample=${tier}`}>Open the {scaffold.name} sample</Link>
+                <Link to={`/board?sample=${format}`}>Open the {scaffold.name} sample</Link>
               </article>
             );
           })}
@@ -163,14 +162,14 @@ export function Landing() {
           <p className="eyebrow">Opponent read</p>
           <h2>Suggest the press.</h2>
           <p>
-            UEFA C steps the nearest two in. UEFA B curves a unit of three. UEFA A jumps the line and narrows the rest. It adds a keyframe you can edit, not a black box.
+            5-a-side and 7-a-side step the nearest two in. 9-a-side curves a unit of three. 11-a-side jumps the line and narrows the rest. It adds a keyframe you can edit.
           </p>
         </article>
       </section>
 
       <footer className="site-footer">
         <p>
-          An independent coaching tool organised around the Scottish FA four-pillar model and UEFA licence themes. Not an official Scottish FA or UEFA product.
+          Sportfika keeps the squad, the pictures, and the session on this browser. From the first grassroots age group to GDL and pro.
         </p>
         <Link to="/board">Start from the current board</Link>
       </footer>

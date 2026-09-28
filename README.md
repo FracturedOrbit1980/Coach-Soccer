@@ -1,22 +1,22 @@
-# Scottish FA UEFA Licence Tactical Platform
+# Sportfika
 
 **Open the app:** [https://fracturedorbit1980.github.io/Coach-Soccer/](https://fracturedorbit1980.github.io/Coach-Soccer/)
 
 The link is case-sensitive. Open that address in a browser and the board runs. No install.
 
-A tactical board and session planner for coach education across UEFA C, UEFA B, and UEFA A. Draw the picture, animate the trigger, and check the plan against the four pillars: the coach, the environment, the player, and the game.
-
-This is an independent coaching tool organised around Scottish FA and UEFA licence themes. It is not an official Scottish FA or UEFA product.
+Sportfika is a tactics board for coaches. Draw 5-a-side, 7-a-side, 9-a-side, and 11-a-side, from the first grassroots age group through to GDL and pro.
 
 ## What you can do
 
-- Switch licence tier and the scaffolding changes with it: formations, phase types, guided questions, and the opponent read.
-- Work on a marked pitch in full, half, box, thirds, or channel view.
-- Place shaded player mannequins, goalkeepers, a ball, cones, training mannequins, goals, and poles.
+- Switch the format and the shapes, areas, and press suggestion change with it.
+- Set the age group: grassroots U6 through U11, youth ages, GDL, and pro.
+- Work on a shaded pitch in full, half, box, thirds, or channel view.
+- Place lifelike player mannequins, goalkeepers, a ball, cones, training mannequins, mini goals, and poles.
+- Select a mini goal and drag the gold handle, or use the angle control, to turn it.
 - Keep a season team sheet. Home players in a drill use those shirt numbers and names.
 - Draw passes, runs, dribbles, pressing zones, and notes.
 - Record keyframes, scrub the timeline, and play the sequence.
-- Ask the board to suggest a press. UEFA C steps two players in, UEFA B curves a unit of three, UEFA A jumps a line.
+- Ask the board to suggest a press. 5-a-side and 7-a-side step two players in, 9-a-side curves a unit of three, 11-a-side jumps a line.
 - Write the session around what, where, who, when, and why, then print a session sheet or export JSON.
 - Copy a share link for the session you are looking at.
 
@@ -50,5 +50,5 @@ You can also export a `.json` file from the File menu and import it on another m
 | --- | --- |
 | `npm run dev` | Local development server |
 | `npm run build` | Typecheck and production build |
-| `npm run preview` | Serve the production build |
 | `npm run lint` | Lint with oxlint |
+| `npm run preview` | Serve the production build |

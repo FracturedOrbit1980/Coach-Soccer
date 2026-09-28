@@ -188,13 +188,16 @@ a { color: inherit; }
 .section-head { max-width: 40rem; margin-bottom: 18px; }
 .section-head h2 { font-size: clamp(2rem, 4vw, 3.4rem); line-height: 0.95; margin: 0; }
 .tier-grid, .split-feature { display: grid; gap: 14px; }
-.tier-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tier-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .split-feature { grid-template-columns: repeat(4, minmax(0, 1fr)); padding-bottom: 40px; }
 .tier-card ul { margin: 0 0 16px; padding-left: 18px; color: var(--muted); }
 .tier-card a { color: var(--gold); }
-.tier-c { box-shadow: inset 3px 0 var(--mint); }
-.tier-b { box-shadow: inset 3px 0 var(--saltire); }
-.tier-a { box-shadow: inset 3px 0 var(--gold); }
+.format-5 { box-shadow: inset 3px 0 var(--mint); }
+.format-7 { box-shadow: inset 3px 0 var(--saltire); }
+.format-9 { box-shadow: inset 3px 0 var(--gold); }
+.format-11 { box-shadow: inset 3px 0 #d24b5a; }
+.field input[type="range"] { padding: 0; accent-color: var(--gold); }
+.pitch-svg [data-rotate] { cursor: grab; }
 .site-footer { color: var(--muted); padding-bottom: 40px; align-items: end; }
 .site-footer p { max-width: 46rem; line-height: 1.5; }
 
