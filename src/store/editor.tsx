@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { TEMPLATES } from "../data/competencies";
 import { createSample } from "../data/samples";
 import { SCAFFOLDS } from "../data/scaffolding";
+import { axesToCompetencies, isClient, isStaffRole, makeClient, makeReview } from "../lib/clients";
 import { tokensForFormation } from "../lib/geometry";
 import { uid } from "../lib/id";
 import { suggestPress } from "../lib/press";
@@ -18,6 +20,7 @@ import {
   updatePhase,
 } from "../lib/session";
 import type {
+  Client,
   Frame,
   InspectorTab,
   LibraryEntry,
@@ -26,7 +29,9 @@ import type {
   PhaseType,
   PitchView,
   Point,
+  Review,
   Session,
+  StaffRole,
   StrokeKind,
   Team,
   Tier,
@@ -41,11 +46,15 @@ interface PersistShape {
   library: LibraryEntry[];
   activePhaseId: string;
   activeFrameId: string;
+  clients: Client[];
+  staffRole: StaffRole;
 }
 
 interface EditorState {
   session: Session;
   library: LibraryEntry[];
+  clients: Client[];
+  staffRole: StaffRole;
   activePhaseId: string;
   activeFrameId: string;
   tool: Tool;
@@ -72,9 +81,12 @@ function loadPersisted(): PersistShape | null {
     const library = Array.isArray(data.library)
       ? data.library.filter((entry) => entry && isSession(entry.session))
       : [];
+    const clients = Array.isArray(data.clients) ? data.clients.filter((entry) => isClient(entry)) : [];
     return {
       session: data.session,
       library,
+      clients,
+      staffRole: isStaffRole(data.staffRole) ? data.staffRole : "coach",
       activePhaseId: data.activePhaseId ?? data.session.phases[0].id,
       activeFrameId: data.activeFrameId ?? data.session.phases[0].frames[0].id,
     };
@@ -88,6 +100,8 @@ function initialState(): EditorState {
   if (saved) {
     return {
       ...saved,
+      clients: saved.clients,
+      staffRole: saved.staffRole,
       tool: "select",
       pitchView: "full",
       selectedId: null,
@@ -108,6 +122,8 @@ function initialState(): EditorState {
   return {
     session,
     library: [],
+    clients: [],
+    staffRole: "coach",
     activePhaseId: lead.phaseId,
     activeFrameId: lead.frameId,
     tool: "select",
@@ -192,8 +208,22 @@ interface EditorApi extends EditorState {
   newSession: (tier?: Tier) => void;
   replaceSession: (session: Session, notice?: string) => void;
   saveLibrary: () => void;
+  saveCopy: () => void;
   loadLibrary: (id: string) => void;
   deleteLibrary: (id: string) => void;
+  setStaffRole: (role: StaffRole) => void;
+  createClient: (input: { name: string; age: string; club: string; position: string }) => string;
+  updateClient: (id: string, partial: Partial<Client>) => void;
+  deleteClient: (id: string) => void;
+  addReview: (clientId: string) => void;
+  updateReview: (clientId: string, reviewId: string, partial: Partial<Review>) => void;
+  deleteReview: (clientId: string, reviewId: string) => void;
+  renameCompetency: (clientId: string, competencyId: string, label: string) => void;
+  addCompetency: (clientId: string, label: string) => void;
+  removeCompetency: (clientId: string, competencyId: string) => void;
+  applyTemplate: (clientId: string, templateId: string) => void;
+  assignClient: (clientId: string | null) => void;
+  newSessionForClient: (clientId: string) => void;
 }
 
 const EditorContext = createContext<EditorApi | null>(null);
@@ -207,6 +237,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     const payload: PersistShape = {
       session: state.session,
       library: state.library,
+      clients: state.clients,
+      staffRole: state.staffRole,
       activePhaseId: phase.id,
       activeFrameId: frame.id,
     };
@@ -551,20 +583,47 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       saveLibrary: () =>
         setState((current) => {
           const snapshot = cloneSession({ ...current.session, updatedAt: now() });
+          const client = current.clients.find((item) => item.id === snapshot.clientId);
           const entry: LibraryEntry = {
             id: snapshot.id,
             name: snapshot.title,
             tier: snapshot.tier,
             updatedAt: snapshot.updatedAt,
             session: snapshot,
+            clientId: snapshot.clientId,
+            savedBy: current.staffRole,
           };
           const exists = current.library.some((item) => item.id === entry.id);
+          const who = client ? `${client.name}` : "this browser";
           return {
             ...current,
             library: exists
               ? current.library.map((item) => (item.id === entry.id ? entry : item))
               : [entry, ...current.library],
-            notice: "Saved on this browser.",
+            notice: `Saved under ${who}.`,
+          };
+        }),
+      saveCopy: () =>
+        setState((current) => {
+          const snapshot = cloneSession(current.session);
+          snapshot.id = uid();
+          snapshot.updatedAt = now();
+          const entry: LibraryEntry = {
+            id: snapshot.id,
+            name: snapshot.title,
+            tier: snapshot.tier,
+            updatedAt: snapshot.updatedAt,
+            session: snapshot,
+            clientId: snapshot.clientId,
+            savedBy: current.staffRole,
+          };
+          return {
+            ...current,
+            session: snapshot,
+            past: [],
+            future: [],
+            library: [entry, ...current.library],
+            notice: "Saved a copy. Further edits stay on this copy.",
           };
         }),
       loadLibrary: (id) =>
@@ -589,6 +648,144 @@ export function EditorProvider({ children }: { children: ReactNode }) {
           ...current,
           library: current.library.filter((item) => item.id !== id),
         })),
+      setStaffRole: (staffRole) => setState((current) => ({ ...current, staffRole })),
+      createClient: (input) => {
+        const client = makeClient(input);
+        setState((current) => ({
+          ...current,
+          clients: [client, ...current.clients],
+          notice: `${client.name} is saved on this browser.`,
+        }));
+        return client.id;
+      },
+      updateClient: (id, partial) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((client) =>
+            client.id === id ? { ...client, ...partial, updatedAt: now() } : client,
+          ),
+        })),
+      deleteClient: (id) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.filter((client) => client.id !== id),
+          session: current.session.clientId === id ? { ...current.session, clientId: undefined } : current.session,
+          notice: "Client removed. Their saved sessions are still in the library.",
+        })),
+      addReview: (clientId) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((client) => {
+            if (client.id !== clientId) return client;
+            const latest = client.reviews[0];
+            const review = makeReview(client.competencies, latest ? { ...latest.scores } : undefined, "Progress review");
+            return { ...client, reviews: [review, ...client.reviews], updatedAt: now() };
+          }),
+          notice: "New review added. Adjust the scores to show what has changed.",
+        })),
+      updateReview: (clientId, reviewId, partial) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((client) => {
+            if (client.id !== clientId) return client;
+            return {
+              ...client,
+              updatedAt: now(),
+              reviews: client.reviews.map((review) => (review.id === reviewId ? { ...review, ...partial } : review)),
+            };
+          }),
+        })),
+      deleteReview: (clientId, reviewId) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((client) => {
+            if (client.id !== clientId || client.reviews.length < 2) return client;
+            return { ...client, reviews: client.reviews.filter((review) => review.id !== reviewId), updatedAt: now() };
+          }),
+        })),
+      renameCompetency: (clientId, competencyId, label) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((client) =>
+            client.id === clientId
+              ? {
+                  ...client,
+                  updatedAt: now(),
+                  competencies: client.competencies.map((item) => (item.id === competencyId ? { ...item, label } : item)),
+                }
+              : client,
+          ),
+        })),
+      addCompetency: (clientId, label) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((client) => {
+            if (client.id !== clientId) return client;
+            const competency = { id: uid(), label: label.trim() || "New competency" };
+            return {
+              ...client,
+              updatedAt: now(),
+              competencies: [...client.competencies, competency],
+              reviews: client.reviews.map((review) => ({ ...review, scores: { ...review.scores, [competency.id]: 5 } })),
+            };
+          }),
+        })),
+      removeCompetency: (clientId, competencyId) =>
+        setState((current) => ({
+          ...current,
+          clients: current.clients.map((client) => {
+            if (client.id !== clientId || client.competencies.length <= 3) return client;
+            return {
+              ...client,
+              updatedAt: now(),
+              competencies: client.competencies.filter((item) => item.id !== competencyId),
+            };
+          }),
+        })),
+      applyTemplate: (clientId, templateId) =>
+        setState((current) => {
+          const template = TEMPLATES.find((item) => item.id === templateId);
+          if (!template) return current;
+          const competencies = axesToCompetencies(template.axes);
+          return {
+            ...current,
+            notice: `${template.label} replaced the axes. Scores start again at 5.`,
+            clients: current.clients.map((client) =>
+              client.id === clientId
+                ? { ...client, competencies, reviews: [makeReview(competencies)], updatedAt: now() }
+                : client,
+            ),
+          };
+        }),
+      assignClient: (clientId) =>
+        setState((current) => {
+          const session = { ...current.session, clientId: clientId ?? undefined, updatedAt: now() };
+          return {
+            ...current,
+            session,
+            library: current.library.map((item) =>
+              item.id === session.id ? { ...item, clientId: clientId ?? undefined, session: cloneSession(session) } : item,
+            ),
+          };
+        }),
+      newSessionForClient: (clientId) =>
+        setState((current) => {
+          const client = current.clients.find((item) => item.id === clientId);
+          const session = blankSession(current.session.tier);
+          session.clientId = clientId;
+          if (client) session.title = `${client.name} session`;
+          return {
+            ...current,
+            session,
+            past: [],
+            future: [],
+            activePhaseId: session.phases[0].id,
+            activeFrameId: session.phases[0].frames[0].id,
+            selectedId: null,
+            inspectorTab: "session",
+            notice: client ? `New session for ${client.name}. Save it when the picture is ready.` : "New session.",
+          };
+        }),
     };
   }, [state]);
 

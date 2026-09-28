@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 import { BoardPage } from "./pages/Board";
+import { ClientProfilePage } from "./pages/ClientProfile";
+import { ClientsPage } from "./pages/Clients";
 import { Landing } from "./pages/Landing";
 import { SheetPage } from "./pages/Sheet";
 import { EditorProvider, useEditor } from "./store/editor";
@@ -26,6 +28,8 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/board" element={<BoardPage />} />
           <Route path="/sheet" element={<SheetPage />} />
+          <Route path="/clients" element={<ClientsPage />} />
+          <Route path="/clients/:clientId" element={<ClientProfilePage />} />
         </Routes>
       </EditorProvider>
     </HashRouter>

@@ -19,7 +19,7 @@ This is an independent coaching tool organised around Scottish FA and UEFA licen
 - Write the session around what, where, who, when, and why, then print a session sheet or export JSON.
 - Copy a share link for the session you are looking at.
 
-The live board is stored in this browser. Use **File → Save current** in the library if you want a named copy beside it.
+The live board is stored in this browser. Open **Clients** to create a player, save training sessions under that name, and record a competency chart as they develop. Use **Save** on the board, or **Save a copy** when you want to keep the previous version.
 
 ## Run it locally
 

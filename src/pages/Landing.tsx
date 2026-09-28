@@ -53,7 +53,8 @@ export function Landing() {
         <nav>
           <a href="#tiers">Licences</a>
           <a href="#pillars">Four pillars</a>
-          <Link to="/board">Open board</Link>
+          <Link to="/clients" className="nav-keep">Clients</Link>
+          <Link to="/board" className="nav-keep">Open board</Link>
         </nav>
       </header>
 

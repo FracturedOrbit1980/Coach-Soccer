@@ -1,4 +1,4 @@
-import { Download, FolderOpen, PanelRight, Redo2, Share2, Undo2, Upload } from "lucide-react";
+import { Download, FolderOpen, PanelRight, Redo2, Save, Share2, Undo2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { SCAFFOLDS } from "../data/scaffolding";
@@ -80,7 +80,21 @@ export function TopBar() {
       >
         Method {report.score}/{report.max}
       </button>
+      <select
+        className="client-select"
+        aria-label="Save this session under"
+        value={editor.session.clientId ?? ""}
+        onChange={(event) => editor.assignClient(event.target.value || null)}
+      >
+        <option value="">No client</option>
+        {editor.clients.map((client) => (
+          <option key={client.id} value={client.id}>{client.name}</option>
+        ))}
+      </select>
       <div className="top-actions">
+        <button type="button" className="labelled" onClick={editor.saveLibrary}>
+          <Save size={15} /> Save
+        </button>
         <button type="button" aria-label="Undo" disabled={!editor.canUndo} onClick={editor.undo}>
           <Undo2 size={16} />
         </button>
@@ -93,6 +107,7 @@ export function TopBar() {
         <button type="button" className="labelled" onClick={() => setMenu(menu === "file" ? null : "file")}>
           File
         </button>
+        <Link to="/clients" className="labelled">Clients</Link>
         <button type="button" aria-label="Library" onClick={() => setMenu(menu === "library" ? null : "library")}>
           <FolderOpen size={16} />
         </button>
@@ -141,6 +156,9 @@ export function TopBar() {
             <button type="button" className="text-btn" onClick={editor.saveLibrary}>
               Save current
             </button>
+            <button type="button" className="text-btn" onClick={editor.saveCopy}>
+              Save a copy
+            </button>
           </div>
           {editor.library.length === 0 && <p className="hint">Nothing saved yet. The live board is kept automatically.</p>}
           {editor.library.map((entry) => (
@@ -148,7 +166,7 @@ export function TopBar() {
               <button type="button" onClick={() => { editor.loadLibrary(entry.id); setMenu(null); }}>
                 <b>{entry.name}</b>
                 <small>
-                  UEFA {entry.tier} · {new Date(entry.updatedAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  {editor.clients.find((client) => client.id === (entry.clientId ?? entry.session.clientId))?.name ?? "No client"} · UEFA {entry.tier} · {new Date(entry.updatedAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </small>
               </button>
               <button type="button" className="text-btn danger" onClick={() => editor.deleteLibrary(entry.id)}>

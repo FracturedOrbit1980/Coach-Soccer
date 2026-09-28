@@ -108,10 +108,38 @@ export interface Opponent {
   weakness: string;
 }
 
+export type StaffRole = "coach" | "assistant";
+
+export interface Competency {
+  id: string;
+  label: string;
+}
+
+export interface Review {
+  id: string;
+  date: string;
+  note: string;
+  scores: Record<string, number>;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  age: string;
+  club: string;
+  position: string;
+  notes: string;
+  competencies: Competency[];
+  reviews: Review[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Session {
   id: string;
   title: string;
   tier: Tier;
+  clientId?: string;
   ageGroup: string;
   duration: number;
   theme: string;
@@ -137,4 +165,6 @@ export interface LibraryEntry {
   tier: Tier;
   updatedAt: string;
   session: Session;
+  clientId?: string;
+  savedBy?: StaffRole;
 }
