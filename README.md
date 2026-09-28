@@ -1,5 +1,9 @@
 # Scottish FA UEFA Licence Tactical Platform
 
+**Open the app:** [https://fracturedorbit1980.github.io/Coach-Soccer/](https://fracturedorbit1980.github.io/Coach-Soccer/)
+
+The link is case-sensitive. Open that address in a browser and the board runs. No install.
+
 A tactical board and session planner for coach education across UEFA C, UEFA B, and UEFA A. Draw the picture, animate the trigger, and check the plan against the four pillars: the coach, the environment, the player, and the game.
 
 This is an independent coaching tool organised around Scottish FA and UEFA licence themes. It is not an official Scottish FA or UEFA product.
@@ -31,14 +35,9 @@ npm run build
 npm run preview
 ```
 
-## Share a URL from GitHub Pages
+## Share a URL
 
-The site uses hash routing and relative asset paths, so it can be hosted from a project site.
-
-1. Publish this repository to GitHub.
-2. In the repository, open **Settings → Pages → Build and deployment** and choose **GitHub Actions**.
-3. Push to `main`. The `Deploy GitHub Pages` workflow builds the app and publishes it.
-4. Share the Pages URL, for example `https://<user>.github.io/<repo>/`.
+The public app is [https://fracturedorbit1980.github.io/Coach-Soccer/](https://fracturedorbit1980.github.io/Coach-Soccer/). Pushes to `main` publish it again through GitHub Actions.
 
 To share one session, open the board and choose **Share**. The copied link reopens that picture, timeline, and plan.
 
